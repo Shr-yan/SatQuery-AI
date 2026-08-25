@@ -1,0 +1,353 @@
+[
+  {
+    "tile_id": "tile_000_x0_y0",
+    "pixel_bbox": [
+      0,
+      0,
+      512,
+      512
+    ],
+    "actual_shape": [
+      4,
+      512,
+      512
+    ],
+    "padded_shape": [
+      4,
+      512,
+      512
+    ],
+    "padding": {
+      "bottom": 0,
+      "right": 0
+    },
+    "geographic_bounds": [
+      300000.0,
+      2994880.0,
+      305120.0,
+      3000000.0
+    ],
+    "crs": "EPSG:32644",
+    "transform": [
+      10.0,
+      0.0,
+      300000.0,
+      0.0,
+      -10.0,
+      3000000.0
+    ],
+    "npy_path": "data/tiles\\tile_000_x0_y0.npy"
+  },
+  {
+    "tile_id": "tile_001_x448_y0",
+    "pixel_bbox": [
+      448,
+      0,
+      960,
+      512
+    ],
+    "actual_shape": [
+      4,
+      512,
+      512
+    ],
+    "padded_shape": [
+      4,
+      512,
+      512
+    ],
+    "padding": {
+      "bottom": 0,
+      "right": 0
+    },
+    "geographic_bounds": [
+      304480.0,
+      2994880.0,
+      309600.0,
+      3000000.0
+    ],
+    "crs": "EPSG:32644",
+    "transform": [
+      10.0,
+      0.0,
+      304480.0,
+      0.0,
+      -10.0,
+      3000000.0
+    ],
+    "npy_path": "data/tiles\\tile_001_x448_y0.npy"
+  },
+  {
+    "tile_id": "tile_002_x896_y0",
+    "pixel_bbox": [
+      896,
+      0,
+      1024,
+      512
+    ],
+    "actual_shape": [
+      4,
+      512,
+      128
+    ],
+    "padded_shape": [
+      4,
+      512,
+      512
+    ],
+    "padding": {
+      "bottom": 0,
+      "right": 384
+    },
+    "geographic_bounds": [
+      308960.0,
+      2994880.0,
+      310240.0,
+      3000000.0
+    ],
+    "crs": "EPSG:32644",
+    "transform": [
+      10.0,
+      0.0,
+      308960.0,
+      0.0,
+      -10.0,
+      3000000.0
+    ],
+    "npy_path": "data/tiles\\tile_002_x896_y0.npy"
+  },
+  {
+    "tile_id": "tile_003_x0_y448",
+    "pixel_bbox": [
+      0,
+      448,
+      512,
+      960
+    ],
+    "actual_shape": [
+      4,
+      512,
+      512
+    ],
+    "padded_shape": [
+      4,
+      512,
+      512
+    ],
+    "padding": {
+      "bottom": 0,
+      "right": 0
+    },
+    "geographic_bounds": [
+      300000.0,
+      2990400.0,
+      305120.0,
+      2995520.0
+    ],
+    "crs": "EPSG:32644",
+    "transform": [
+      10.0,
+      0.0,
+      300000.0,
+      0.0,
+      -10.0,
+      2995520.0
+    ],
+    "npy_path": "data/tiles\\tile_003_x0_y448.npy"
+  },
+  {
+    "tile_id": "tile_004_x448_y448",
+    "pixel_bbox": [
+      448,
+      448,
+      960,
+      960
+    ],
+    "actual_shape": [
+      4,
+      512,
+      512
+    ],
+    "padded_shape": [
+      4,
+      512,
+      512
+    ],
+    "padding": {
+      "bottom": 0,
+      "right": 0
+    },
+    "geographic_bounds": [
+      304480.0,
+      2990400.0,
+      309600.0,
+      2995520.0
+    ],
+    "crs": "EPSG:32644",
+    "transform": [
+      10.0,
+      0.0,
+      304480.0,
+      0.0,
+      -10.0,
+      2995520.0
+    ],
+    "npy_path": "data/tiles\\tile_004_x448_y448.npy"
+  },
+  {
+    "tile_id": "tile_005_x896_y448",
+    "pixel_bbox": [
+      896,
+      448,
+      1024,
+      960
+    ],
+    "actual_shape": [
+      4,
+      512,
+      128
+    ],
+    "padded_shape": [
+      4,
+      512,
+      512
+    ],
+    "padding": {
+      "bottom": 0,
+      "right": 384
+    },
+    "geographic_bounds": [
+      308960.0,
+      2990400.0,
+      310240.0,
+      2995520.0
+    ],
+    "crs": "EPSG:32644",
+    "transform": [
+      10.0,
+      0.0,
+      308960.0,
+      0.0,
+      -10.0,
+      2995520.0
+    ],
+    "npy_path": "data/tiles\\tile_005_x896_y448.npy"
+  },
+  {
+    "tile_id": "tile_006_x0_y896",
+    "pixel_bbox": [
+      0,
+      896,
+      512,
+      1024
+    ],
+    "actual_shape": [
+      4,
+      128,
+      512
+    ],
+    "padded_shape": [
+      4,
+      512,
+      512
+    ],
+    "padding": {
+      "bottom": 384,
+      "right": 0
+    },
+    "geographic_bounds": [
+      300000.0,
+      2989760.0,
+      305120.0,
+      2991040.0
+    ],
+    "crs": "EPSG:32644",
+    "transform": [
+      10.0,
+      0.0,
+      300000.0,
+      0.0,
+      -10.0,
+      2991040.0
+    ],
+    "npy_path": "data/tiles\\tile_006_x0_y896.npy"
+  },
+  {
+    "tile_id": "tile_007_x448_y896",
+    "pixel_bbox": [
+      448,
+      896,
+      960,
+      1024
+    ],
+    "actual_shape": [
+      4,
+      128,
+      512
+    ],
+    "padded_shape": [
+      4,
+      512,
+      512
+    ],
+    "padding": {
+      "bottom": 384,
+      "right": 0
+    },
+    "geographic_bounds": [
+      304480.0,
+      2989760.0,
+      309600.0,
+      2991040.0
+    ],
+    "crs": "EPSG:32644",
+    "transform": [
+      10.0,
+      0.0,
+      304480.0,
+      0.0,
+      -10.0,
+      2991040.0
+    ],
+    "npy_path": "data/tiles\\tile_007_x448_y896.npy"
+  },
+  {
+    "tile_id": "tile_008_x896_y896",
+    "pixel_bbox": [
+      896,
+      896,
+      1024,
+      1024
+    ],
+    "actual_shape": [
+      4,
+      128,
+      128
+    ],
+    "padded_shape": [
+      4,
+      512,
+      512
+    ],
+    "padding": {
+      "bottom": 384,
+      "right": 384
+    },
+    "geographic_bounds": [
+      308960.0,
+      2989760.0,
+      310240.0,
+      2991040.0
+    ],
+    "crs": "EPSG:32644",
+    "transform": [
+      10.0,
+      0.0,
+      308960.0,
+      0.0,
+      -10.0,
+      2991040.0
+    ],
+    "npy_path": "data/tiles\\tile_008_x896_y896.npy"
+  }
+]

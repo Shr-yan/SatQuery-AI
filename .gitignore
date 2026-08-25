@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Large satellite/raw data
+data/raw/**/*.tif
+data/raw/**/*.jp2
+data/raw/**/*.npy
+
+# Processed datasets
+data/processed/**/*.tif
+data/processed/**/*.npy
+
+# ML generated model
+data/processed/*.pth
+
+# Generated previews/results
+data/processed/results/
+data/processed/train/
+data/processed/val/
+data/processed/train_labels/
+data/processed/val_labels/
+data/processed/chips/
+data/processed/labels/
+data/processed/ml/
+
+# Generated tiles
+data/tiles/
+
+# Keep the directory structure
+!data/.gitkeep
