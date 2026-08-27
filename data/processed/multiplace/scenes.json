@@ -1,0 +1,30 @@
+{
+  "delhi": {
+    "scene_id": "S2A_MSIL2A_20260306T053251_R105_T43RGM_20260310T110618",
+    "date": "2026-03-06",
+    "cloud_cover": 0.0001,
+    "tile": "43RGM",
+    "split": "train"
+  },
+  "jaipur": {
+    "scene_id": "S2C_MSIL2A_20251204T053221_R105_T43REK_20251204T091915",
+    "date": "2025-12-04",
+    "cloud_cover": 0.001176,
+    "tile": "43REK",
+    "split": "train"
+  },
+  "bhopal": {
+    "scene_id": "S2C_MSIL2A_20260209T051951_R062_T43QGF_20260209T102711",
+    "date": "2026-02-09",
+    "cloud_cover": 0.000239,
+    "tile": "43QGF",
+    "split": "val"
+  },
+  "hyderabad": {
+    "scene_id": "S2B_MSIL2A_20251213T051119_R019_T43QHV_20251213T071206",
+    "date": "2025-12-13",
+    "cloud_cover": 0.000332,
+    "tile": "43QHV",
+    "split": "test"
+  }
+}
