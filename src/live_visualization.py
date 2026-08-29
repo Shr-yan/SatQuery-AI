@@ -8,11 +8,6 @@ from live_chip import (
 )
 
 
-RESULTS_DIR = Path(
-    "data/processed/results"
-)
-
-
 def stretch_rgb(rgb):
 
     output = np.zeros_like(
@@ -28,8 +23,9 @@ def stretch_rgb(rgb):
             channel
         ]
 
-        valid = np.isfinite(
-            band
+        valid = (
+            np.isfinite(band)
+            & (band > 0)
         )
 
         if not np.any(valid):
@@ -96,7 +92,7 @@ def create_rgb_preview(
     )
 
     plt.figure(
-        figsize=(7, 7)
+        figsize=(9, 9)
     )
 
     plt.imshow(
@@ -115,7 +111,7 @@ def create_rgb_preview(
 
     plt.savefig(
         output_path,
-        dpi=160,
+        dpi=180,
         bbox_inches="tight",
     )
 
@@ -153,7 +149,7 @@ def create_ndvi_preview(
     )
 
     plt.figure(
-        figsize=(8, 7)
+        figsize=(10, 9)
     )
 
     image = plt.imshow(
@@ -186,7 +182,7 @@ def create_ndvi_preview(
 
     plt.savefig(
         output_path,
-        dpi=160,
+        dpi=180,
         bbox_inches="tight",
     )
 

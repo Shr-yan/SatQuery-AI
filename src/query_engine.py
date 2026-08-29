@@ -223,6 +223,18 @@ def build_analysis_response(
             "------------------",
 
             (
+                "Model input resolution: "
+                f"{result['resolution']['model_chip']}x"
+                f"{result['resolution']['model_chip']}"
+            ),
+
+            (
+                "Display resolution: "
+                f"{result['resolution']['display_chip']}x"
+                f"{result['resolution']['display_chip']}"
+            ),
+
+            (
                 "RGB preview: "
                 f"{outputs['rgb_preview']}"
             ),
@@ -231,6 +243,10 @@ def build_analysis_response(
                 "Quality-masked "
                 "NDVI map: "
                 f"{outputs['ndvi_preview']}"
+            ),
+            (
+                "Result metadata: "
+                f"{outputs['metadata']}"
             ),
 
             "",

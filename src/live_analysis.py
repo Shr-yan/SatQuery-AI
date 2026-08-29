@@ -5,6 +5,9 @@ from bbox import create_bbox
 from geocoder import geocode_location
 
 from live_chip import (
+    DISPLAY_CHIP_SIZE,
+    MODEL_CHIP_SIZE,
+    build_display_chip,
     build_model_chip,
     build_scl_valid_mask,
     read_scl_chip,
@@ -27,6 +30,10 @@ from real_data import (
     get_signed_band_urls,
     get_signed_scl_url,
     search_sentinel2,
+)
+
+from result_export import (
+    save_result_json,
 )
 
 
@@ -56,9 +63,7 @@ def classify_vegetation(
 
         return "Healthy vegetation"
 
-    return (
-        "Dense healthy vegetation"
-    )
+    return "Dense healthy vegetation"
 
 
 def classify_model_agreement(
@@ -125,9 +130,9 @@ def analyze_location(
     predictor=None,
 ):
 
-    # ---------------------------------
+    # -----------------------------
     # 1. Geocode
-    # ---------------------------------
+    # -----------------------------
 
     coordinates = geocode_location(
         location
@@ -140,9 +145,9 @@ def analyze_location(
             f"location: {location}"
         )
 
-    # ---------------------------------
+    # -----------------------------
     # 2. AOI
-    # ---------------------------------
+    # -----------------------------
 
     bbox_dict = create_bbox(
         coordinates["latitude"],
@@ -157,9 +162,9 @@ def analyze_location(
         bbox_dict["max_lat"],
     ]
 
-    # ---------------------------------
-    # 3. Sentinel-2 search
-    # ---------------------------------
+    # -----------------------------
+    # 3. Search
+    # -----------------------------
 
     scenes = search_sentinel2(
         bbox=stac_bbox,
@@ -173,10 +178,6 @@ def analyze_location(
             "scenes were found."
         )
 
-    # ---------------------------------
-    # 4. Rank scenes
-    # ---------------------------------
-
     ranked_scenes = rank_scenes(
         scenes,
         target_date=target_date,
@@ -184,16 +185,18 @@ def analyze_location(
 
     scene = None
     scene_info = None
-    chip = None
-    chip_quality = None
-    scl = None
-    scl_quality = None
+
+    model_chip = None
+    model_chip_quality = None
+
+    band_urls = None
+    scl_url = None
 
     rejected_scenes = []
 
-    # ---------------------------------
-    # 5. AOI-aware scene selection
-    # ---------------------------------
+    # -----------------------------
+    # 4. AOI-aware scene selection
+    # -----------------------------
 
     for candidate in ranked_scenes:
 
@@ -211,7 +214,7 @@ def analyze_location(
                 )
             )
 
-            candidate_chip = (
+            candidate_model_chip = (
                 build_model_chip(
                     candidate_urls,
                     stac_bbox,
@@ -220,7 +223,7 @@ def analyze_location(
 
             candidate_quality = (
                 summarize_chip_quality(
-                    candidate_chip
+                    candidate_model_chip
                 )
             )
 
@@ -256,25 +259,9 @@ def analyze_location(
 
                 continue
 
-            # Read SCL only after the
-            # geometric coverage test
-            # has passed.
             candidate_scl_url = (
                 get_signed_scl_url(
                     candidate
-                )
-            )
-
-            candidate_scl = (
-                read_scl_chip(
-                    candidate_scl_url,
-                    stac_bbox,
-                )
-            )
-
-            candidate_scl_quality = (
-                summarize_scl_quality(
-                    candidate_scl
                 )
             )
 
@@ -284,20 +271,20 @@ def analyze_location(
                 candidate_info
             )
 
-            chip = (
-                candidate_chip
+            model_chip = (
+                candidate_model_chip
             )
 
-            chip_quality = (
+            model_chip_quality = (
                 candidate_quality
             )
 
-            scl = (
-                candidate_scl
+            band_urls = (
+                candidate_urls
             )
 
-            scl_quality = (
-                candidate_scl_quality
+            scl_url = (
+                candidate_scl_url
             )
 
             break
@@ -307,9 +294,7 @@ def analyze_location(
             rejected_scenes.append(
                 {
                     "id":
-                    candidate_info[
-                        "id"
-                    ],
+                    candidate_info["id"],
 
                     "date":
                     candidate_info[
@@ -324,8 +309,6 @@ def analyze_location(
                 }
             )
 
-            continue
-
     if scene is None:
 
         raise RuntimeError(
@@ -336,14 +319,14 @@ def analyze_location(
 
     valid_coverage = (
         1.0
-        - chip_quality[
+        - model_chip_quality[
             "zero_fraction"
         ]
     )
 
-    # ---------------------------------
-    # 6. Date difference
-    # ---------------------------------
+    # -----------------------------
+    # 5. Date difference
+    # -----------------------------
 
     date_difference_days = None
 
@@ -366,23 +349,47 @@ def analyze_location(
             ).days
         )
 
-    # ---------------------------------
-    # 7. Pixel-level SCL mask
-    # ---------------------------------
+    # -----------------------------
+    # 6. High-resolution display /
+    #    scientific chip
+    # -----------------------------
 
-    scl_valid_mask = (
-        build_scl_valid_mask(
-            scl
+    display_chip = (
+        build_display_chip(
+            band_urls,
+            stac_bbox,
         )
     )
 
-    # ---------------------------------
-    # 8. Scientific NDVI
-    # ---------------------------------
+    display_scl = (
+        read_scl_chip(
+            scl_url,
+            stac_bbox,
+            chip_size=(
+                DISPLAY_CHIP_SIZE
+            ),
+        )
+    )
+
+    scl_valid_mask = (
+        build_scl_valid_mask(
+            display_scl
+        )
+    )
+
+    scl_quality = (
+        summarize_scl_quality(
+            display_scl
+        )
+    )
+
+    # -----------------------------
+    # 7. Scientific NDVI
+    # -----------------------------
 
     ndvi_stats = (
         summarize_chip_ndvi(
-            chip,
+            display_chip,
             valid_mask=(
                 scl_valid_mask
             ),
@@ -395,14 +402,9 @@ def analyze_location(
         )
     )
 
-    # ---------------------------------
-    # 9. CNN verification
-    #
-    # Model input stays identical to
-    # training preprocessing.
-    # We do NOT alter the CNN chip using
-    # SCL masking.
-    # ---------------------------------
+    # -----------------------------
+    # 8. CNN
+    # -----------------------------
 
     if predictor is None:
 
@@ -412,7 +414,7 @@ def analyze_location(
 
     prediction = (
         predictor.predict_chip(
-            chip
+            model_chip
         )
     )
 
@@ -427,18 +429,9 @@ def analyze_location(
         )
     )
 
-    # ---------------------------------
-    # 10. Visual products
-    # ---------------------------------
-
-    results_dir = Path(
-        "data/processed/results"
-    )
-
-    results_dir.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
+    # -----------------------------
+    # 9. Query-specific folder
+    # -----------------------------
 
     safe_location = (
         location.lower()
@@ -446,49 +439,73 @@ def analyze_location(
             " ",
             "_"
         )
+        .replace(
+            ",",
+            ""
+        )
     )
 
     scene_date = (
         scene_info["date"]
     )
 
-    rgb_output = (
-        results_dir
+    result_folder = (
+        Path(
+            "data/processed/results"
+        )
         / (
             f"{safe_location}_"
-            f"{scene_date}_rgb.png"
+            f"{scene_date}"
         )
+    )
+
+    result_folder.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    rgb_output = (
+        result_folder
+        / "rgb.png"
     )
 
     ndvi_output = (
-        results_dir
-        / (
-            f"{safe_location}_"
-            f"{scene_date}_ndvi.png"
-        )
+        result_folder
+        / "ndvi.png"
+    )
+
+    metadata_output = (
+        result_folder
+        / "result.json"
     )
 
     create_rgb_preview(
-        chip,
+        display_chip,
         rgb_output,
     )
 
     create_ndvi_preview(
-        chip,
+        display_chip,
         ndvi_output,
         valid_mask=(
             scl_valid_mask
         ),
     )
 
-    # ---------------------------------
-    # 11. Structured result
-    # ---------------------------------
+    # -----------------------------
+    # 10. Result object
+    # -----------------------------
 
-    return {
+    result = {
 
         "location":
         location,
+
+        "resolved_location":
+        coordinates.get(
+            "name",
+            location,
+        ),
 
         "coordinates":
         coordinates,
@@ -516,13 +533,17 @@ def analyze_location(
         "valid_coverage":
         valid_coverage,
 
-        "chip_shape":
-        list(
-            chip.shape
-        ),
+        "resolution": {
+
+            "model_chip":
+            MODEL_CHIP_SIZE,
+
+            "display_chip":
+            DISPLAY_CHIP_SIZE,
+        },
 
         "chip_quality":
-        chip_quality,
+        model_chip_quality,
 
         "scl_quality":
         scl_quality,
@@ -567,6 +588,11 @@ def analyze_location(
 
         "outputs": {
 
+            "folder":
+            str(
+                result_folder
+            ),
+
             "rgb_preview":
             str(
                 rgb_output
@@ -576,8 +602,24 @@ def analyze_location(
             str(
                 ndvi_output
             ),
+
+            "metadata":
+            str(
+                metadata_output
+            ),
         },
     }
+
+    # -----------------------------
+    # 11. Save JSON metadata
+    # -----------------------------
+
+    save_result_json(
+        result,
+        metadata_output,
+    )
+
+    return result
 
 
 if __name__ == "__main__":
@@ -588,11 +630,11 @@ if __name__ == "__main__":
     )
 
     print(
-        "\nSATQUERY LIVE ANALYSIS"
+        "\nSATQUERY ANALYSIS"
     )
 
     print(
-        "----------------------"
+        "-----------------"
     )
 
     print(
@@ -602,29 +644,29 @@ if __name__ == "__main__":
 
     print(
         "Scene:",
-        result["scene"]
+        result["scene"]["id"]
     )
 
     print(
-        "AOI coverage:",
+        "Model resolution:",
         result[
-            "valid_coverage"
-        ]
+            "resolution"
+        ]["model_chip"]
     )
 
     print(
-        "SCL quality:",
+        "Display resolution:",
         result[
-            "scl_quality"
-        ]
+            "resolution"
+        ]["display_chip"]
     )
 
     print(
-        "Masked NDVI:",
+        "NDVI:",
         result["ndvi"]
     )
 
     print(
-        "Model:",
-        result["model"]
+        "Outputs:",
+        result["outputs"]
     )

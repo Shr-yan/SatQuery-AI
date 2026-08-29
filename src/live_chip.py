@@ -15,12 +15,10 @@ BAND_ORDER = [
     "B08",
 ]
 
-CHIP_SIZE = 256
+MODEL_CHIP_SIZE = 256
+DISPLAY_CHIP_SIZE = 768
 
 
-# Sentinel-2 Scene Classification
-# classes that SatQuery treats as
-# unreliable for scientific NDVI.
 INVALID_SCL_CLASSES = {
     0,   # No data
     1,   # Saturated / defective
@@ -36,7 +34,7 @@ INVALID_SCL_CLASSES = {
 def read_band_chip(
     url,
     bbox,
-    chip_size=CHIP_SIZE,
+    chip_size=MODEL_CHIP_SIZE,
 ):
 
     min_lon, min_lat, max_lon, max_lat = bbox
@@ -65,9 +63,7 @@ def read_band_chip(
                 chip_size,
                 chip_size,
             ),
-            resampling=(
-                Resampling.bilinear
-            ),
+            resampling=Resampling.bilinear,
             boundless=True,
             fill_value=0,
         )
@@ -78,7 +74,7 @@ def read_band_chip(
 def read_scl_chip(
     url,
     bbox,
-    chip_size=CHIP_SIZE,
+    chip_size=MODEL_CHIP_SIZE,
 ):
 
     min_lon, min_lat, max_lon, max_lat = bbox
@@ -100,9 +96,6 @@ def read_scl_chip(
             transform=src.transform,
         )
 
-        # SCL is categorical data,
-        # therefore nearest-neighbour
-        # resampling must be used.
         scl = src.read(
             1,
             window=window,
@@ -110,9 +103,7 @@ def read_scl_chip(
                 chip_size,
                 chip_size,
             ),
-            resampling=(
-                Resampling.nearest
-            ),
+            resampling=Resampling.nearest,
             boundless=True,
             fill_value=0,
         )
@@ -122,9 +113,10 @@ def read_scl_chip(
     )
 
 
-def build_model_chip(
+def build_chip(
     band_urls,
     bbox,
+    chip_size,
 ):
 
     bands = []
@@ -134,13 +126,13 @@ def build_model_chip(
         if band not in band_urls:
 
             raise KeyError(
-                f"Missing required band: "
-                f"{band}"
+                f"Missing required band: {band}"
             )
 
         array = read_band_chip(
             band_urls[band],
             bbox,
+            chip_size=chip_size,
         )
 
         bands.append(
@@ -154,8 +146,7 @@ def build_model_chip(
         np.float32
     )
 
-    # Sentinel-2 L2A reflectance
-    # scale factor.
+    # Sentinel-2 L2A reflectance scaling.
     chip /= 10000.0
 
     chip = np.clip(
@@ -167,6 +158,30 @@ def build_model_chip(
     return chip
 
 
+def build_model_chip(
+    band_urls,
+    bbox,
+):
+
+    return build_chip(
+        band_urls,
+        bbox,
+        MODEL_CHIP_SIZE,
+    )
+
+
+def build_display_chip(
+    band_urls,
+    bbox,
+):
+
+    return build_chip(
+        band_urls,
+        bbox,
+        DISPLAY_CHIP_SIZE,
+    )
+
+
 def build_scl_valid_mask(
     scl,
 ):
@@ -176,9 +191,7 @@ def build_scl_valid_mask(
         dtype=bool,
     )
 
-    for class_id in (
-        INVALID_SCL_CLASSES
-    ):
+    for class_id in INVALID_SCL_CLASSES:
 
         valid &= (
             scl != class_id
@@ -201,8 +214,6 @@ def calculate_chip_ndvi(
     red = chip[2]
     nir = chip[3]
 
-    # Missing pixels caused by
-    # raster boundary padding.
     raster_valid = np.any(
         chip > 0,
         axis=0,
@@ -324,9 +335,7 @@ def summarize_chip_quality(
 
     finite_fraction = float(
         np.mean(
-            np.isfinite(
-                chip
-            )
+            np.isfinite(chip)
         )
     )
 
@@ -362,54 +371,47 @@ def summarize_scl_quality(
         )
     )
 
-    invalid_fraction = float(
-        1.0
-        - np.mean(
-            valid_mask
-        )
-    )
-
     cloud_classes = (
         (scl == 8)
         | (scl == 9)
         | (scl == 10)
     )
 
-    cloud_fraction = float(
-        np.mean(
-            cloud_classes
-        )
-    )
-
-    shadow_fraction = float(
-        np.mean(
-            (scl == 2)
-            | (scl == 3)
-        )
-    )
-
-    snow_fraction = float(
-        np.mean(
-            scl == 11
-        )
+    shadow_classes = (
+        (scl == 2)
+        | (scl == 3)
     )
 
     return {
+
         "valid_fraction": float(
             np.mean(
                 valid_mask
             )
         ),
 
-        "invalid_fraction":
-        invalid_fraction,
+        "invalid_fraction": float(
+            1.0
+            - np.mean(
+                valid_mask
+            )
+        ),
 
-        "cloud_fraction":
-        cloud_fraction,
+        "cloud_fraction": float(
+            np.mean(
+                cloud_classes
+            )
+        ),
 
-        "shadow_fraction":
-        shadow_fraction,
+        "shadow_fraction": float(
+            np.mean(
+                shadow_classes
+            )
+        ),
 
-        "snow_fraction":
-        snow_fraction,
+        "snow_fraction": float(
+            np.mean(
+                scl == 11
+            )
+        ),
     }
