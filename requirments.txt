@@ -1,15 +1,13 @@
+numpy
 rasterio
 pyproj
-numpy
-matplotlib
 shapely
-pillow
-
-
-=== SatQuery AI Phase 1 Environment ===
-Rasterio: 1.5.1
-NumPy: 2.5.2
-PyProj: 3.7.2
-Shapely: 2.1.2
-Pillow: 12.3.0
-Environment OK!
+Pillow
+matplotlib
+requests
+pystac-client
+planetary-computer
+torch
+fastapi
+uvicorn
+pydantic
