@@ -2,9 +2,10 @@ import numpy as np
 import rasterio
 
 from rasterio.enums import Resampling
-from rasterio.transform import from_bounds
 from rasterio.warp import transform_bounds
-from rasterio.windows import from_bounds as window_from_bounds
+from rasterio.windows import (
+    from_bounds as window_from_bounds,
+)
 
 
 BAND_ORDER = [
@@ -67,6 +68,7 @@ def build_model_chip(
     for band in BAND_ORDER:
 
         if band not in band_urls:
+
             raise KeyError(
                 f"Missing required band: {band}"
             )
@@ -83,6 +85,7 @@ def build_model_chip(
         axis=0,
     ).astype(np.float32)
 
+    # Sentinel-2 L2A reflectance scaling
     chip /= 10000.0
 
     chip = np.clip(
@@ -97,6 +100,7 @@ def build_model_chip(
 def calculate_chip_ndvi(chip):
 
     if chip.shape[0] != 4:
+
         raise ValueError(
             "Expected four bands."
         )
@@ -104,16 +108,31 @@ def calculate_chip_ndvi(chip):
     red = chip[2]
     nir = chip[3]
 
+    # If every band is zero, treat the
+    # pixel as missing / outside raster.
+    valid_data = np.any(
+        chip > 0,
+        axis=0,
+    )
+
     denominator = nir + red
 
-    ndvi = np.divide(
-        nir - red,
-        denominator,
-        out=np.zeros_like(
-            denominator,
-            dtype=np.float32,
-        ),
-        where=np.abs(denominator) > 1e-6,
+    valid = (
+        valid_data
+        & np.isfinite(red)
+        & np.isfinite(nir)
+        & (np.abs(denominator) > 1e-6)
+    )
+
+    ndvi = np.full(
+        red.shape,
+        np.nan,
+        dtype=np.float32,
+    )
+
+    ndvi[valid] = (
+        (nir[valid] - red[valid])
+        / denominator[valid]
     )
 
     return ndvi
@@ -121,11 +140,16 @@ def calculate_chip_ndvi(chip):
 
 def summarize_chip_ndvi(chip):
 
-    ndvi = calculate_chip_ndvi(chip)
+    ndvi = calculate_chip_ndvi(
+        chip
+    )
 
-    valid = np.isfinite(ndvi)
+    valid = np.isfinite(
+        ndvi
+    )
 
     if not np.any(valid):
+
         raise ValueError(
             "No valid NDVI pixels found."
         )
@@ -133,8 +157,55 @@ def summarize_chip_ndvi(chip):
     values = ndvi[valid]
 
     return {
-        "mean": float(np.mean(values)),
-        "min": float(np.min(values)),
-        "max": float(np.max(values)),
-        "std": float(np.std(values)),
+        "mean": float(
+            np.mean(values)
+        ),
+        "min": float(
+            np.min(values)
+        ),
+        "max": float(
+            np.max(values)
+        ),
+        "std": float(
+            np.std(values)
+        ),
+    }
+
+
+def summarize_chip_quality(chip):
+
+    if chip.shape[0] != 4:
+
+        raise ValueError(
+            "Expected four bands."
+        )
+
+    # A pixel is considered missing when
+    # every Sentinel-2 band is zero.
+    all_zero = np.all(
+        chip == 0,
+        axis=0,
+    )
+
+    zero_fraction = float(
+        np.mean(all_zero)
+    )
+
+    finite_fraction = float(
+        np.mean(
+            np.isfinite(chip)
+        )
+    )
+
+    band_means = {
+        BAND_ORDER[index]: float(
+            np.mean(chip[index])
+        )
+        for index in range(4)
+    }
+
+    return {
+        "zero_fraction": zero_fraction,
+        "finite_fraction": finite_fraction,
+        "band_means": band_means,
     }
