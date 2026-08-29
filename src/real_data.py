@@ -18,10 +18,14 @@ REQUIRED_BANDS = [
     "B08",
 ]
 
+QUALITY_BAND = "SCL"
+
 
 def connect_catalog():
 
-    return Client.open(STAC_URL)
+    return Client.open(
+        STAC_URL
+    )
 
 
 def search_sentinel2(
@@ -33,11 +37,7 @@ def search_sentinel2(
     max_items=100,
 ):
 
-    if len(bbox) != 4:
-        raise ValueError(
-            "bbox must be "
-            "[min_lon, min_lat, max_lon, max_lat]"
-        )
+    catalog = connect_catalog()
 
     if target_date:
 
@@ -47,55 +47,77 @@ def search_sentinel2(
         )
 
         start = (
-            target - timedelta(days=days_before)
-        ).date()
+            target
+            - timedelta(
+                days=days_before
+            )
+        )
 
         end = (
-            target + timedelta(days=days_after)
-        ).date()
+            target
+            + timedelta(
+                days=days_after
+            )
+        )
 
     else:
 
-        end = datetime.utcnow().date()
+        end = datetime.utcnow()
 
-        start = end - timedelta(days=90)
+        start = (
+            end
+            - timedelta(
+                days=90
+            )
+        )
 
-    date_range = f"{start}/{end}"
-
-    catalog = connect_catalog()
+    date_range = (
+        f"{start.strftime('%Y-%m-%d')}"
+        "/"
+        f"{end.strftime('%Y-%m-%d')}"
+    )
 
     search = catalog.search(
-        collections=[COLLECTION],
+        collections=[
+            COLLECTION
+        ],
         bbox=bbox,
         datetime=date_range,
+        query={
+            "eo:cloud_cover": {
+                "lte": max_cloud
+            }
+        },
         max_items=max_items,
     )
 
-    items = list(search.items())
+    items = list(
+        search.items()
+    )
 
-    candidates = []
+    valid_items = []
 
     for item in items:
 
-        cloud = item.properties.get(
-            "eo:cloud_cover"
-        )
-
-        if cloud is None:
-            continue
-
-        if cloud > max_cloud:
-            continue
+        assets = item.assets
 
         if not all(
-            band in item.assets
+            band in assets
             for band in REQUIRED_BANDS
         ):
             continue
 
-        candidates.append(item)
+        # SCL is now required because
+        # SatQuery uses it for pixel-level
+        # quality masking.
+        if QUALITY_BAND not in assets:
+            continue
 
-    return candidates
+        valid_items.append(
+            item
+        )
+
+    return valid_items
 
 
 def select_best_scene(
@@ -104,6 +126,7 @@ def select_best_scene(
 ):
 
     if not items:
+
         return None
 
     if target_date:
@@ -141,21 +164,13 @@ def select_best_scene(
 
 def get_signed_band_urls(item):
 
-    if item is None:
-        raise ValueError(
-            "Scene item cannot be None."
-        )
-
     urls = {}
 
     for band in REQUIRED_BANDS:
 
-        asset = item.assets.get(band)
-
-        if asset is None:
-            raise KeyError(
-                f"Scene is missing band {band}"
-            )
+        asset = item.assets[
+            band
+        ]
 
         urls[band] = (
             planetary_computer.sign(
@@ -166,32 +181,61 @@ def get_signed_band_urls(item):
     return urls
 
 
+def get_signed_scl_url(item):
+
+    if QUALITY_BAND not in item.assets:
+
+        raise KeyError(
+            "Selected Sentinel-2 scene "
+            "does not contain an SCL asset."
+        )
+
+    return planetary_computer.sign(
+        item.assets[
+            QUALITY_BAND
+        ].href
+    )
+
+
 def get_scene_info(item):
 
-    if item is None:
-        return None
+    cloud_cover = (
+        item.properties.get(
+            "eo:cloud_cover"
+        )
+    )
+
+    tile = (
+        item.properties.get(
+            "s2:mgrs_tile"
+        )
+        or item.properties.get(
+            "s2:tile_id"
+        )
+    )
 
     return {
         "id": item.id,
+
         "date": (
-            item.datetime.date().isoformat()
+            item.datetime
+            .date()
+            .isoformat()
         ),
+
         "cloud_cover": (
-            item.properties.get(
-                "eo:cloud_cover"
-            )
+            float(cloud_cover)
+            if cloud_cover
+            is not None
+            else None
         ),
-        "tile": (
-            item.properties.get(
-                "s2:mgrs_tile"
-            )
-        ),
+
+        "tile": tile,
     }
 
 
 if __name__ == "__main__":
 
-    # Small standalone test around Lucknow.
     test_bbox = [
         80.90,
         26.80,
@@ -199,37 +243,42 @@ if __name__ == "__main__":
         26.88,
     ]
 
-    target_date = "2026-01-15"
-
     scenes = search_sentinel2(
         bbox=test_bbox,
-        target_date=target_date,
+        target_date="2026-01-15",
     )
 
     print(
-        "Candidate scenes:",
+        "Scenes found:",
         len(scenes)
     )
 
-    best = select_best_scene(
-        scenes,
-        target_date=target_date,
-    )
+    if scenes:
 
-    if best is None:
-
-        print("No suitable scene found.")
-
-    else:
-
-        info = get_scene_info(best)
-
-        print("Selected scene:")
-        print(info)
-
-        urls = get_signed_band_urls(best)
+        best = select_best_scene(
+            scenes,
+            target_date="2026-01-15",
+        )
 
         print(
-            "Available signed bands:",
-            list(urls.keys())
+            "Best scene:",
+            get_scene_info(best)
+        )
+
+        print(
+            "Bands:",
+            list(
+                get_signed_band_urls(
+                    best
+                ).keys()
+            )
+        )
+
+        print(
+            "SCL available:",
+            bool(
+                get_signed_scl_url(
+                    best
+                )
+            )
         )

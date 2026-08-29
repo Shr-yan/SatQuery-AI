@@ -12,11 +12,17 @@ def build_analysis_response(
     result,
 ):
 
-    scene = result["scene"]
+    scene = result[
+        "scene"
+    ]
 
-    ndvi = result["ndvi"]
+    ndvi = result[
+        "ndvi"
+    ]
 
-    model = result["model"]
+    model = result[
+        "model"
+    ]
 
     coordinates = result[
         "coordinates"
@@ -26,8 +32,12 @@ def build_analysis_response(
         "chip_quality"
     ]
 
+    scl_quality = result[
+        "scl_quality"
+    ]
+
     outputs = result[
-    "outputs"
+        "outputs"
     ]
 
     resolved_location = (
@@ -44,7 +54,7 @@ def build_analysis_response(
         "",
 
         (
-            f"Location: "
+            "Location: "
             f"{result['location']}"
         ),
 
@@ -75,7 +85,8 @@ def build_analysis_response(
         ),
 
         (
-            "Cloud cover: "
+            "Cloud cover "
+            "(scene metadata): "
             f"{scene['cloud_cover']:.3f}%"
         ),
 
@@ -91,15 +102,11 @@ def build_analysis_response(
         ),
 
         (
-            "Selected-scene AOI coverage: "
+            "Selected-scene AOI "
+            "coverage: "
             f"{result['valid_coverage'] * 100:.1f}%"
         ),
-
     ]
-
-    # --------------------------------
-    # Requested vs selected date
-    # --------------------------------
 
     if (
         result[
@@ -117,31 +124,50 @@ def build_analysis_response(
             )
         )
 
-    else:
-
-        lines.append(
-            "Requested date: "
-            "latest available search"
-        )
-
     # --------------------------------
-    # Scientific analysis
+    # Pixel quality
     # --------------------------------
 
     lines.extend(
         [
             "",
+            "AOI Pixel Quality",
+            "-----------------",
+
+            (
+                "SCL-valid pixels: "
+                f"{scl_quality['valid_fraction'] * 100:.2f}%"
+            ),
+
+            (
+                "Cloud pixels: "
+                f"{scl_quality['cloud_fraction'] * 100:.2f}%"
+            ),
+
+            (
+                "Shadow pixels: "
+                f"{scl_quality['shadow_fraction'] * 100:.2f}%"
+            ),
+
+            (
+                "Snow/ice pixels: "
+                f"{scl_quality['snow_fraction'] * 100:.2f}%"
+            ),
+
+            "",
             "Vegetation Analysis",
             "-------------------",
 
             (
-                "Finite-data fraction: "
-                f"{quality['finite_fraction']:.4f}"
+                "All-zero raster "
+                "pixel fraction: "
+                f"{quality['zero_fraction']:.4f}"
             ),
 
             (
-                "All-zero pixel fraction: "
-                f"{quality['zero_fraction']:.4f}"
+                "NDVI pixels used "
+                "after masking: "
+                f"{ndvi['valid_pixel_fraction'] * 100:.2f}%"
             ),
 
             (
@@ -160,7 +186,8 @@ def build_analysis_response(
             ),
 
             (
-                "NDVI standard deviation: "
+                "NDVI standard "
+                "deviation: "
                 f"{ndvi['std']:.4f}"
             ),
 
@@ -174,23 +201,20 @@ def build_analysis_response(
             "---------------",
 
             (
-                "Band means: "
-                f"{quality['band_means']}"
-            ),
-
-            (
-                "CNN predicted mean NDVI: "
+                "CNN predicted "
+                "mean NDVI: "
                 f"{model['prediction']:.4f}"
             ),
 
             (
                 "Difference from "
-                "calculated NDVI: "
+                "quality-masked NDVI: "
                 f"{model['absolute_difference']:.4f}"
             ),
 
             (
-                "Model/reference agreement: "
+                "Model/reference "
+                "agreement: "
                 f"{model['agreement']}"
             ),
 
@@ -204,17 +228,21 @@ def build_analysis_response(
             ),
 
             (
+                "Quality-masked "
                 "NDVI map: "
                 f"{outputs['ndvi_preview']}"
             ),
+
+            "",
             "Answer",
             "------",
 
             (
-                "The Sentinel-2 observation "
-                f"selected for "
-                f"{result['location']} "
-                "has a mean NDVI of "
+                "The Sentinel-2 "
+                "observation selected "
+                f"for {result['location']} "
+                "has a quality-masked "
+                "mean NDVI of "
                 f"{ndvi['mean']:.4f}. "
                 "This is heuristically "
                 "classified as "
@@ -283,7 +311,8 @@ def process_query(query):
         return (
             parsed,
             (
-                "SatQuery analysis failed: "
+                "SatQuery analysis "
+                "failed: "
                 f"{error}"
             ),
         )
@@ -314,4 +343,6 @@ if __name__ == "__main__":
         )
     )
 
-    print(response)
+    print(
+        response
+    )

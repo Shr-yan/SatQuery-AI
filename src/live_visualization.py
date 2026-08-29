@@ -3,7 +3,9 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
-from live_chip import calculate_chip_ndvi
+from live_chip import (
+    calculate_chip_ndvi,
+)
 
 
 RESULTS_DIR = Path(
@@ -20,9 +22,15 @@ def stretch_rgb(rgb):
 
     for channel in range(3):
 
-        band = rgb[:, :, channel]
+        band = rgb[
+            :,
+            :,
+            channel
+        ]
 
-        valid = np.isfinite(band)
+        valid = np.isfinite(
+            band
+        )
 
         if not np.any(valid):
             continue
@@ -40,7 +48,11 @@ def stretch_rgb(rgb):
         if high <= low:
             continue
 
-        output[:, :, channel] = (
+        output[
+            :,
+            :,
+            channel
+        ] = (
             (band - low)
             / (high - low)
         )
@@ -56,12 +68,6 @@ def create_rgb_preview(
     chip,
     output_path,
 ):
-
-    # Input order:
-    # B02 = Blue
-    # B03 = Green
-    # B04 = Red
-    # B08 = NIR
 
     red = chip[2]
     green = chip[1]
@@ -93,13 +99,17 @@ def create_rgb_preview(
         figsize=(7, 7)
     )
 
-    plt.imshow(rgb)
+    plt.imshow(
+        rgb
+    )
 
     plt.title(
         "Sentinel-2 RGB Preview"
     )
 
-    plt.axis("off")
+    plt.axis(
+        "off"
+    )
 
     plt.tight_layout()
 
@@ -111,16 +121,26 @@ def create_rgb_preview(
 
     plt.close()
 
-    return str(output_path)
+    return str(
+        output_path
+    )
 
 
 def create_ndvi_preview(
     chip,
     output_path,
+    valid_mask=None,
 ):
 
     ndvi = calculate_chip_ndvi(
-        chip
+        chip,
+        valid_mask=valid_mask,
+    )
+
+    masked_ndvi = (
+        np.ma.masked_invalid(
+            ndvi
+        )
     )
 
     output_path = Path(
@@ -137,17 +157,20 @@ def create_ndvi_preview(
     )
 
     image = plt.imshow(
-        ndvi,
+        masked_ndvi,
         cmap="RdYlGn",
         vmin=-1,
         vmax=1,
     )
 
     plt.title(
-        "Sentinel-2 NDVI"
+        "Sentinel-2 NDVI "
+        "(SCL Quality Masked)"
     )
 
-    plt.axis("off")
+    plt.axis(
+        "off"
+    )
 
     colorbar = plt.colorbar(
         image,
@@ -169,4 +192,6 @@ def create_ndvi_preview(
 
     plt.close()
 
-    return str(output_path)
+    return str(
+        output_path
+    )
