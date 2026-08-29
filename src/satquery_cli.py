@@ -1,11 +1,16 @@
-from query_engine import process_query
+from query_engine import (
+    process_query,
+)
 
 
-def main():
+def run_cli():
 
     print(
-        "\nSatQuery AI"
-        "\n-----------"
+        "SatQuery AI"
+    )
+
+    print(
+        "-----------"
     )
 
     print(
@@ -13,48 +18,46 @@ def main():
     )
 
     print(
-        "Type 'exit' to quit.\n"
+        "Type 'exit' to quit."
     )
 
     while True:
 
-        try:
+        query = input(
+            "\nSatQuery > "
+        ).strip()
 
-            query = input(
-                "SatQuery > "
-            ).strip()
-
-        except (
-            KeyboardInterrupt,
-            EOFError,
-        ):
-
-            print("\nGoodbye.")
-            break
-
-        if not query:
-            continue
-
-        if query.lower() in [
+        if query.lower() in {
             "exit",
             "quit",
             "q",
-        ]:
+        }:
 
-            print("Goodbye.")
+            print(
+                "Goodbye."
+            )
+
             break
+
+        if not query:
+
+            continue
 
         print(
             "\nProcessing...\n"
         )
 
-        _, response = process_query(
-            query
+        _, formatted = (
+            process_query(
+                query
+            )
         )
 
-        print(response)
-        print()
+        print(
+            formatted
+        )
 
 
 if __name__ == "__main__":
-    main()
+
+    run_cli()

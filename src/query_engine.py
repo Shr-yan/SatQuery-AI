@@ -1,50 +1,58 @@
-from live_analysis import (
-    analyze_location,
-)
-
-from query_parser import (
-    parse_query,
+from satquery_service import (
+    execute_query,
 )
 
 
-def build_analysis_response(
-    parsed,
-    result,
+def format_success_response(
+    response,
 ):
 
-    scene = result[
-        "scene"
-    ]
+    location = (
+        response[
+            "location"
+        ]
+    )
 
-    ndvi = result[
-        "ndvi"
-    ]
+    date = (
+        response[
+            "date"
+        ]
+    )
 
-    model = result[
-        "model"
-    ]
+    scene = (
+        response[
+            "scene"
+        ]
+    )
 
-    coordinates = result[
-        "coordinates"
-    ]
+    quality = (
+        response[
+            "quality"
+        ]
+    )
 
-    quality = result[
-        "chip_quality"
-    ]
+    vegetation = (
+        response[
+            "vegetation"
+        ]
+    )
 
-    scl_quality = result[
-        "scl_quality"
-    ]
+    model = (
+        response[
+            "model"
+        ]
+    )
 
-    outputs = result[
-        "outputs"
-    ]
+    outputs = (
+        response[
+            "outputs"
+        ]
+    )
 
-    resolved_location = (
-        coordinates.get(
-            "name",
-            result["location"],
-        )
+    resolution = (
+        response[
+            "resolution"
+        ]
     )
 
     lines = [
@@ -55,29 +63,39 @@ def build_analysis_response(
 
         (
             "Location: "
-            f"{result['location']}"
+            f"{location['requested']}"
         ),
 
         (
             "Resolved location: "
-            f"{resolved_location}"
+            f"{location['resolved']}"
         ),
 
         (
             "Coordinates: "
-            f"{coordinates['latitude']:.6f}, "
-            f"{coordinates['longitude']:.6f}"
+            f"{location['latitude']:.6f}, "
+            f"{location['longitude']:.6f}"
         ),
 
         (
             "Requested date: "
-            f"{result['requested_date']}"
+            f"{date['requested']}"
         ),
 
         (
             "Selected scene date: "
-            f"{scene['date']}"
+            f"{date['selected']}"
         ),
+
+        (
+            "Difference from "
+            "requested date: "
+            f"{date['difference_days']} days"
+        ),
+
+        "",
+        "Scene Information",
+        "-----------------",
 
         (
             "Sentinel-2 scene: "
@@ -85,280 +103,213 @@ def build_analysis_response(
         ),
 
         (
+            "MGRS tile: "
+            f"{scene['tile']}"
+        ),
+
+        (
             "Cloud cover "
             "(scene metadata): "
-            f"{scene['cloud_cover']:.3f}%"
+            f"{scene['cloud_cover_percent']:.3f}%"
         ),
 
         (
             "Candidate scenes: "
-            f"{result['candidate_scene_count']}"
+            f"{scene['candidate_count']}"
         ),
 
         (
-            "Scenes rejected for "
-            "coverage/error: "
-            f"{result['rejected_scene_count']}"
+            "Rejected scenes: "
+            f"{scene['rejected_count']}"
         ),
 
         (
-            "Selected-scene AOI "
-            "coverage: "
-            f"{result['valid_coverage'] * 100:.1f}%"
+            "AOI coverage: "
+            f"{scene['aoi_coverage_percent']:.2f}%"
         ),
+
+        "",
+        "AOI Pixel Quality",
+        "-----------------",
+
+        (
+            "SCL-valid pixels: "
+            f"{quality['scl_valid_percent']:.2f}%"
+        ),
+
+        (
+            "Cloud pixels: "
+            f"{quality['cloud_percent']:.2f}%"
+        ),
+
+        (
+            "Shadow pixels: "
+            f"{quality['shadow_percent']:.2f}%"
+        ),
+
+        (
+            "Snow/ice pixels: "
+            f"{quality['snow_percent']:.2f}%"
+        ),
+
+        "",
+        "Vegetation Analysis",
+        "-------------------",
+
+        (
+            "Mean NDVI: "
+            f"{vegetation['mean_ndvi']:.4f}"
+        ),
+
+        (
+            "Minimum NDVI: "
+            f"{vegetation['min_ndvi']:.4f}"
+        ),
+
+        (
+            "Maximum NDVI: "
+            f"{vegetation['max_ndvi']:.4f}"
+        ),
+
+        (
+            "NDVI standard deviation: "
+            f"{vegetation['std_ndvi']:.4f}"
+        ),
+
+        (
+            "NDVI pixels used: "
+            f"{vegetation['valid_pixel_percent']:.2f}%"
+        ),
+
+        (
+            "Vegetation condition: "
+            f"{vegetation['condition']}"
+        ),
+
+        "",
+        "ML Verification",
+        "---------------",
+
+        (
+            "CNN predicted "
+            "mean NDVI: "
+            f"{model['predicted_mean_ndvi']:.4f}"
+        ),
+
+        (
+            "Difference from "
+            "scientific NDVI: "
+            f"{model['absolute_difference']:.4f}"
+        ),
+
+        (
+            "Model/reference agreement: "
+            f"{model['agreement']}"
+        ),
+
+        "",
+        "Generated Products",
+        "------------------",
+
+        (
+            "Model resolution: "
+            f"{resolution['model']}x"
+            f"{resolution['model']}"
+        ),
+
+        (
+            "Display resolution: "
+            f"{resolution['display']}x"
+            f"{resolution['display']}"
+        ),
+
+        (
+            "RGB preview: "
+            f"{outputs['rgb_preview']}"
+        ),
+
+        (
+            "NDVI map: "
+            f"{outputs['ndvi_preview']}"
+        ),
+
+        (
+            "Result metadata: "
+            f"{outputs['metadata']}"
+        ),
+
+        "",
+        "Answer",
+        "------",
+
+        response[
+            "message"
+        ],
     ]
-
-    if (
-        result[
-            "date_difference_days"
-        ]
-        is not None
-    ):
-
-        lines.append(
-            (
-                "Difference from "
-                "requested date: "
-                f"{result['date_difference_days']} "
-                "days"
-            )
-        )
-
-    # --------------------------------
-    # Pixel quality
-    # --------------------------------
-
-    lines.extend(
-        [
-            "",
-            "AOI Pixel Quality",
-            "-----------------",
-
-            (
-                "SCL-valid pixels: "
-                f"{scl_quality['valid_fraction'] * 100:.2f}%"
-            ),
-
-            (
-                "Cloud pixels: "
-                f"{scl_quality['cloud_fraction'] * 100:.2f}%"
-            ),
-
-            (
-                "Shadow pixels: "
-                f"{scl_quality['shadow_fraction'] * 100:.2f}%"
-            ),
-
-            (
-                "Snow/ice pixels: "
-                f"{scl_quality['snow_fraction'] * 100:.2f}%"
-            ),
-
-            "",
-            "Vegetation Analysis",
-            "-------------------",
-
-            (
-                "All-zero raster "
-                "pixel fraction: "
-                f"{quality['zero_fraction']:.4f}"
-            ),
-
-            (
-                "NDVI pixels used "
-                "after masking: "
-                f"{ndvi['valid_pixel_fraction'] * 100:.2f}%"
-            ),
-
-            (
-                "Mean NDVI: "
-                f"{ndvi['mean']:.4f}"
-            ),
-
-            (
-                "Minimum NDVI: "
-                f"{ndvi['min']:.4f}"
-            ),
-
-            (
-                "Maximum NDVI: "
-                f"{ndvi['max']:.4f}"
-            ),
-
-            (
-                "NDVI standard "
-                "deviation: "
-                f"{ndvi['std']:.4f}"
-            ),
-
-            (
-                "Vegetation condition: "
-                f"{ndvi['condition']}"
-            ),
-
-            "",
-            "ML Verification",
-            "---------------",
-
-            (
-                "CNN predicted "
-                "mean NDVI: "
-                f"{model['prediction']:.4f}"
-            ),
-
-            (
-                "Difference from "
-                "quality-masked NDVI: "
-                f"{model['absolute_difference']:.4f}"
-            ),
-
-            (
-                "Model/reference "
-                "agreement: "
-                f"{model['agreement']}"
-            ),
-
-            "",
-            "Generated Products",
-            "------------------",
-
-            (
-                "Model input resolution: "
-                f"{result['resolution']['model_chip']}x"
-                f"{result['resolution']['model_chip']}"
-            ),
-
-            (
-                "Display resolution: "
-                f"{result['resolution']['display_chip']}x"
-                f"{result['resolution']['display_chip']}"
-            ),
-
-            (
-                "RGB preview: "
-                f"{outputs['rgb_preview']}"
-            ),
-
-            (
-                "Quality-masked "
-                "NDVI map: "
-                f"{outputs['ndvi_preview']}"
-            ),
-            (
-                "Result metadata: "
-                f"{outputs['metadata']}"
-            ),
-
-            "",
-            "Answer",
-            "------",
-
-            (
-                "The Sentinel-2 "
-                "observation selected "
-                f"for {result['location']} "
-                "has a quality-masked "
-                "mean NDVI of "
-                f"{ndvi['mean']:.4f}. "
-                "This is heuristically "
-                "classified as "
-                f"{ndvi['condition'].lower()}."
-            ),
-        ]
-    )
 
     return "\n".join(
         lines
     )
 
 
-def process_query(query):
+def format_error_response(
+    response,
+):
 
-    parsed = parse_query(
+    error = response[
+        "error"
+    ]
+
+    return (
+        "SatQuery AI Error\n"
+        "=================\n\n"
+        f"Type: {error['type']}\n"
+        f"Message: {error['message']}"
+    )
+
+
+def process_query(
+    query,
+):
+
+    response = execute_query(
         query
     )
 
-    location = parsed.get(
-        "location"
-    )
-
-    if not location:
-
-        return (
-            parsed,
-            (
-                "SatQuery could not "
-                "determine the "
-                "requested location."
-            ),
-        )
-
-    analysis_type = parsed.get(
-        "analysis_type"
-    )
-
-    if analysis_type not in [
-        "ndvi",
-        "vegetation",
+    if response[
+        "success"
     ]:
 
-        return (
-            parsed,
-            (
-                "SatQuery understood "
-                "the request, but this "
-                "Phase 4 pipeline "
-                "currently supports "
-                "NDVI/vegetation analysis."
-            ),
+        formatted = (
+            format_success_response(
+                response
+            )
         )
 
-    try:
+    else:
 
-        result = analyze_location(
-            location=location,
-            target_date=parsed.get(
-                "date"
-            ),
+        formatted = (
+            format_error_response(
+                response
+            )
         )
-
-    except Exception as error:
-
-        return (
-            parsed,
-            (
-                "SatQuery analysis "
-                "failed: "
-                f"{error}"
-            ),
-        )
-
-    response = (
-        build_analysis_response(
-            parsed,
-            result,
-        )
-    )
 
     return (
-        parsed,
         response,
+        formatted,
     )
 
 
 if __name__ == "__main__":
 
-    query = (
-        "Analyze vegetation health "
-        "for Varanasi on 2026-02-10"
-    )
-
-    parsed, response = (
+    response, formatted = (
         process_query(
-            query
+            "Analyze vegetation "
+            "health for Varanasi "
+            "on 2026-02-10"
         )
     )
 
     print(
-        response
+        formatted
     )
