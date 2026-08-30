@@ -4,6 +4,8 @@ __pycache__/
 .venv/
 venv/
 
+.env
+
 # Large satellite/raw data
 data/raw/**/*.tif
 data/raw/**/*.jp2

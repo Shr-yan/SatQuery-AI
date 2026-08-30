@@ -101,6 +101,44 @@ const trendDetailsGrid =
     document.getElementById(
         "trendDetailsGrid"
     );
+
+const aiChat =
+    document.getElementById(
+        "aiChat"
+    );
+
+const chatMessages =
+    document.getElementById(
+        "chatMessages"
+    );
+
+const chatInput =
+    document.getElementById(
+        "chatInput"
+    );
+
+const chatSendButton =
+    document.getElementById(
+        "chatSendButton"
+    );
+
+const chatStatus =
+    document.getElementById(
+        "chatStatus"
+    );
+
+const clearChatButton =
+    document.getElementById(
+        "clearChatButton"
+    );
+
+
+let currentAnalysisResult =
+    null;
+
+
+let conversationHistory =
+    [];
 function imageUrl(
     path
 ) {
@@ -1297,12 +1335,400 @@ function showTrendResult(
 
 }
 
-function showResult(
+function resetChat() {
+
+    conversationHistory =
+        [];
+
+
+    chatMessages.innerHTML =
+        "";
+
+
+    addChatMessage(
+        "assistant",
+        (
+            "I have the current "
+            + "satellite-analysis result. "
+            + "Ask me anything about it."
+        )
+    );
+
+
+    chatStatus.textContent =
+        "";
+
+}
+
+
+function addChatMessage(
+    role,
+    content
+) {
+
+    const message =
+        document.createElement(
+            "div"
+        );
+
+
+    message.classList.add(
+        "chat-message"
+    );
+
+
+    if (
+        role === "user"
+    ) {
+
+        message.classList.add(
+            "user-message"
+        );
+
+    }
+
+    else {
+
+        message.classList.add(
+            "assistant-message"
+        );
+
+    }
+
+
+    const roleElement =
+        document.createElement(
+            "div"
+        );
+
+
+    roleElement.className =
+        "chat-role";
+
+
+    roleElement.textContent =
+        (
+            role === "user"
+                ? "You"
+                : "SatQuery AI"
+        );
+
+
+    const textElement =
+        document.createElement(
+            "div"
+        );
+
+
+    textElement.className =
+        "chat-text";
+
+
+    textElement.textContent =
+        content;
+
+
+    message.appendChild(
+        roleElement
+    );
+
+
+    message.appendChild(
+        textElement
+    );
+
+
+    chatMessages.appendChild(
+        message
+    );
+
+
+    chatMessages.scrollTop =
+        chatMessages.scrollHeight;
+
+}
+
+
+function updateResultFromTool(
     data
 ) {
 
     hideModeSections();
 
+
+    setText(
+        "resultMessage",
+        data.message
+    );
+
+
+    if (
+        data.trend_analysis
+        === true
+    ) {
+
+        showTrendResult(
+            data
+        );
+
+    }
+
+    else if (
+        data.change_analysis
+        === true
+    ) {
+
+        showChangeResult(
+            data
+        );
+
+    }
+
+    else if (
+        data.analysis_type
+        === "imagery"
+    ) {
+
+        showImageryResult(
+            data
+        );
+
+    }
+
+    else if (
+        data.analysis_type
+            === "ndwi"
+        || data.analysis_type
+            === "water"
+        || data.analysis_type
+            === "ndbi"
+        || data.analysis_type
+            === "urban"
+    ) {
+
+        showEnvironmentalResult(
+            data
+        );
+
+    }
+
+    else {
+
+        showVegetationResult(
+            data
+        );
+
+    }
+
+
+    /*
+    Keep the AI chat visible.
+    Do NOT reset the conversation.
+    */
+    aiChat
+        .classList
+        .remove(
+            "hidden"
+        );
+
+}
+
+async function sendChatMessage() {
+
+    const question =
+        chatInput.value.trim();
+
+
+    if (
+        !question
+        || !currentAnalysisResult
+    ) {
+
+        return;
+
+    }
+
+
+    addChatMessage(
+        "user",
+        question
+    );
+
+
+    chatInput.value =
+        "";
+
+
+    chatSendButton.disabled =
+        true;
+
+
+    chatInput.disabled =
+        true;
+
+
+    chatStatus.textContent =
+        "SatQuery AI is processing your request...";
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/chat",
+                {
+                    method:
+                        "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify(
+                            {
+                                question:
+                                    question,
+
+                                analysis_result:
+                                    currentAnalysisResult,
+
+                                conversation_history:
+                                    conversationHistory
+                            }
+                        )
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            !response.ok
+        ) {
+
+            const message =
+                data.detail?.message
+                || "AI assistant failed.";
+
+            throw new Error(
+                message
+            );
+
+        }
+
+
+        addChatMessage(
+            "assistant",
+            data.answer
+        );
+
+
+        conversationHistory.push(
+            {
+                role:
+                    "user",
+
+                content:
+                    question
+            }
+        );
+
+
+        conversationHistory.push(
+            {
+                role:
+                    "assistant",
+
+                content:
+                    data.answer
+            }
+        );
+
+
+        /*
+        If SatQuery AI executed a new
+        scientific analysis, update the
+        main result area automatically.
+        */
+        if (
+            data.tool_executed
+            === true
+            && data.analysis_result
+        ) {
+
+            currentAnalysisResult =
+                data.analysis_result;
+
+
+            updateResultFromTool(
+                data.analysis_result
+            );
+
+        }
+
+
+        chatStatus.textContent =
+            "";
+
+    }
+
+    catch (
+        error
+    ) {
+
+        addChatMessage(
+            "assistant",
+            (
+                "I could not answer "
+                + "that question: "
+                + error.message
+            )
+        );
+
+
+        chatStatus.textContent =
+            "";
+
+    }
+
+    finally {
+
+        chatSendButton.disabled =
+            false;
+
+
+        chatInput.disabled =
+            false;
+
+
+        chatInput.focus();
+
+    }
+
+}
+
+
+function showResult(
+    data
+) {
+
+    hideModeSections();
+    currentAnalysisResult =
+        data;
+
+
+    resetChat();
+
+
+    aiChat
+        .classList
+        .remove(
+            "hidden"
+        );
 
     results.style.display =
         "block";
@@ -1402,7 +1828,19 @@ async function analyze() {
         return;
 
     }
+    currentAnalysisResult =
+        null;
 
+
+    conversationHistory =
+        [];
+
+
+    aiChat
+        .classList
+        .add(
+            "hidden"
+        );
 
     analyzeButton.disabled =
         true;
@@ -1546,3 +1984,39 @@ document
 
         }
     );
+
+chatSendButton.addEventListener(
+    "click",
+    sendChatMessage
+);
+
+
+chatInput.addEventListener(
+    "keydown",
+    function (
+        event
+    ) {
+
+        if (
+            event.key
+            === "Enter"
+        ) {
+
+            sendChatMessage();
+
+        }
+
+    }
+);
+
+
+clearChatButton.addEventListener(
+    "click",
+    function () {
+
+        resetChat();
+
+        chatInput.focus();
+
+    }
+);

@@ -1,7 +1,10 @@
 from pathlib import Path
+from typing import Any
+
 from fastapi.staticfiles import (
     StaticFiles,
 )
+
 from fastapi import (
     FastAPI,
     HTTPException,
@@ -18,6 +21,10 @@ from fastapi.responses import (
 from pydantic import (
     BaseModel,
     Field,
+)
+
+from ai_assistant import (
+    SatQueryAssistant,
 )
 
 from satquery_service import (
@@ -49,11 +56,14 @@ app = FastAPI(
     title="SatQuery AI API",
     description=(
         "Natural-language Sentinel-2 "
-        "satellite imagery and "
-        "environmental analysis service."
+        "satellite imagery, scientific "
+        "analysis and grounded AI "
+        "follow-up assistant."
     ),
-    version="0.3.0",
+    version="0.4.0",
 )
+
+
 app.mount(
     "/static",
     StaticFiles(
@@ -63,6 +73,7 @@ app.mount(
     ),
     name="static",
 )
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -97,6 +108,38 @@ class QueryRequest(
     )
 
 
+class ChatMessage(
+    BaseModel
+):
+
+    role: str
+
+    content: str
+
+
+class ChatRequest(
+    BaseModel
+):
+
+    question: str = Field(
+        ...,
+        min_length=2,
+        description=(
+            "Follow-up question about "
+            "the current SatQuery result."
+        ),
+    )
+
+    analysis_result: dict[
+        str,
+        Any
+    ]
+
+    conversation_history: list[
+        ChatMessage
+    ] = []
+
+
 @app.get("/")
 def root():
 
@@ -108,7 +151,7 @@ def root():
         "running",
 
         "version":
-        "0.3.0",
+        "0.4.0",
 
         "web_app":
         "/app",
@@ -124,6 +167,9 @@ def root():
             "water",
             "NDBI",
             "urban",
+            "two-date change analysis",
+            "vegetation trend analysis",
+            "grounded AI follow-up chat",
         ],
     }
 
@@ -136,7 +182,7 @@ def health():
         "healthy",
 
         "version":
-        "0.3.0",
+        "0.4.0",
     }
 
 
@@ -183,21 +229,101 @@ def analyze(
         raise HTTPException(
             status_code=400,
             detail={
-                "type": (
-                    error[
-                        "type"
-                    ]
-                ),
+                "type":
+                error[
+                    "type"
+                ],
 
-                "message": (
-                    error[
-                        "message"
-                    ]
-                ),
+                "message":
+                error[
+                    "message"
+                ],
             },
         )
 
     return response
+
+
+@app.post("/chat")
+def chat(
+    request: ChatRequest,
+):
+
+    try:
+
+        assistant = (
+            SatQueryAssistant()
+        )
+
+        history = [
+            {
+                "role":
+                message.role,
+
+                "content":
+                message.content,
+            }
+
+            for message
+            in request.conversation_history
+        ]
+
+        assistant_result = (
+            assistant.answer(
+                question=(
+                    request.question
+                ),
+
+                analysis_result=(
+                    request.analysis_result
+                ),
+
+                conversation_history=(
+                    history
+                ),
+            )
+        )
+
+
+        return {
+            "success":
+            True,
+
+            "answer":
+            assistant_result[
+                "answer"
+            ],
+
+            "tool_executed":
+            assistant_result[
+                "tool_executed"
+            ],
+
+            "tool_query":
+            assistant_result[
+                "tool_query"
+            ],
+
+            "analysis_result":
+            assistant_result[
+                "analysis_result"
+            ],
+        }
+
+    except Exception as error:
+
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "type":
+                "ai_assistant_failed",
+
+                "message":
+                str(
+                    error
+                ),
+            },
+        )
 
 
 @app.get("/result-image")

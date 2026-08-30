@@ -977,6 +977,82 @@
 
         </div>
 
+                <!-- AI FOLLOW-UP ASSISTANT -->
+
+        <div
+            class="ai-chat hidden"
+            id="aiChat"
+        >
+
+            <div class="ai-chat-header">
+
+                <div>
+                    <h2>
+                        Ask SatQuery AI
+                    </h2>
+
+                    <p>
+                        Ask follow-up questions about
+                        this satellite analysis.
+                    </p>
+                </div>
+
+                <button
+                    id="clearChatButton"
+                    class="chat-clear-button"
+                    type="button"
+                >
+                    Clear Chat
+                </button>
+
+            </div>
+
+
+            <div
+                class="chat-messages"
+                id="chatMessages"
+            >
+
+                <div class="chat-message assistant-message">
+                    <div class="chat-role">
+                        SatQuery AI
+                    </div>
+
+                    <div class="chat-text">
+                        I have the current satellite-analysis
+                        result. Ask me anything about it.
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div
+                class="chat-status"
+                id="chatStatus"
+            ></div>
+
+
+            <div class="chat-input-row">
+
+                <input
+                    id="chatInput"
+                    type="text"
+                    placeholder="Ask a follow-up about this result..."
+                    autocomplete="off"
+                >
+
+                <button
+                    id="chatSendButton"
+                    type="button"
+                >
+                    Send
+                </button>
+
+            </div>
+
+        </div>
+
     </section>
 
 </main>
