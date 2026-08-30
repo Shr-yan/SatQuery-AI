@@ -1533,6 +1533,47 @@ function updateResultFromTool(
 
 }
 
+function isVisionQuestion(
+    question
+) {
+
+    const text =
+        question
+        .toLowerCase();
+
+
+    const visionTerms = [
+        "what do you see",
+        "describe the image",
+        "describe this image",
+        "describe the map",
+        "describe this map",
+        "what is visible",
+        "visually",
+        "visible pattern",
+        "spatial pattern",
+        "where in the image",
+        "where is vegetation",
+        "where is water",
+        "what does the map show",
+        "what does this map show",
+        "what does the image show",
+        "look at the image",
+        "look at the map",
+        "interpret the image",
+        "interpret the map"
+    ];
+
+
+    return visionTerms.some(
+        term =>
+            text.includes(
+                term
+            )
+    );
+
+}
+
 async function sendChatMessage() {
 
     const question =
@@ -1567,15 +1608,52 @@ async function sendChatMessage() {
         true;
 
 
+    const useVision =
+        isVisionQuestion(
+            question
+        );
+
+
     chatStatus.textContent =
-        "SatQuery AI is processing your request...";
+        useVision
+            ? "SatQuery AI is examining the current image..."
+            : "SatQuery AI is processing your request...";
 
 
     try {
 
+
+        const endpoint =
+            useVision
+                ? "/vision-chat"
+                : "/chat";
+
+
+        const requestBody =
+            useVision
+                ? {
+                    question:
+                        question,
+
+                    analysis_result:
+                        currentAnalysisResult
+                }
+
+                : {
+                    question:
+                        question,
+
+                    analysis_result:
+                        currentAnalysisResult,
+
+                    conversation_history:
+                        conversationHistory
+                };
+
+
         const response =
             await fetch(
-                "/chat",
+                endpoint,
                 {
                     method:
                         "POST",
@@ -1587,16 +1665,7 @@ async function sendChatMessage() {
 
                     body:
                         JSON.stringify(
-                            {
-                                question:
-                                    question,
-
-                                analysis_result:
-                                    currentAnalysisResult,
-
-                                conversation_history:
-                                    conversationHistory
-                            }
+                            requestBody
                         )
                 }
             );

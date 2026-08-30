@@ -31,6 +31,13 @@ from satquery_service import (
     execute_query,
 )
 
+from vision_assistant import (
+    SatQueryVisionAssistant,
+)
+
+from vision_context import (
+    choose_vision_image,
+)
 
 PROJECT_ROOT = (
     Path(__file__)
@@ -107,7 +114,19 @@ class QueryRequest(
         ),
     )
 
+class VisionRequest(
+    BaseModel
+):
 
+    question: str = Field(
+        ...,
+        min_length=2,
+    )
+
+    analysis_result: dict[
+        str,
+        Any
+    ]
 class ChatMessage(
     BaseModel
 ):
@@ -325,7 +344,105 @@ def chat(
             },
         )
 
+@app.post("/vision-chat")
+def vision_chat(
+    request: VisionRequest,
+):
 
+    try:
+
+        image_type, image_path = (
+            choose_vision_image(
+                analysis_result=(
+                    request.analysis_result
+                ),
+
+                question=(
+                    request.question
+                ),
+            )
+        )
+
+
+        if (
+            not image_type
+            or not image_path
+        ):
+
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "type":
+                    "vision_image_not_found",
+
+                    "message":
+                    (
+                        "No suitable generated "
+                        "SatQuery image is "
+                        "available for this result."
+                    ),
+                },
+            )
+
+
+        assistant = (
+            SatQueryVisionAssistant()
+        )
+
+
+        answer = (
+            assistant.analyze_image(
+                question=(
+                    request.question
+                ),
+
+                image_path=(
+                    image_path
+                ),
+
+                analysis_result=(
+                    request.analysis_result
+                ),
+
+                image_type=(
+                    image_type
+                ),
+            )
+        )
+
+
+        return {
+            "success":
+            True,
+
+            "answer":
+            answer,
+
+            "image_type":
+            image_type,
+        }
+
+
+    except HTTPException:
+
+        raise
+
+
+    except Exception as error:
+
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "type":
+                "vision_analysis_failed",
+
+                "message":
+                str(
+                    error
+                ),
+            },
+        )
+    
 @app.get("/result-image")
 def result_image(
     path: str,
