@@ -106,6 +106,12 @@
             >
                 Urban Change
             </button>
+            <button
+                class="example-button"
+                data-query="Analyze vegetation trend in Varanasi between 2026-01-10 and 2026-04-10"
+            >
+                Vegetation Trend
+            </button>
 
         </div>
 
@@ -395,6 +401,67 @@
 
         </div>
 
+        <div
+            class="metrics hidden"
+            id="trendMetrics"
+>
+
+            <div class="metric">
+                <div class="metric-label">
+                    First Mean NDVI
+                </div>
+
+                <div
+                    class="metric-value"
+                    id="trendFirstMean"
+                >
+                    -
+                </div>
+            </div>
+
+
+            <div class="metric">
+                <div class="metric-label">
+                    Last Mean NDVI
+                </div>
+
+                <div
+                    class="metric-value"
+                    id="trendLastMean"
+                >
+                    -
+                </div>
+            </div>
+
+
+            <div class="metric">
+                <div class="metric-label">
+                    Total Change
+                </div>
+
+                <div
+                    class="metric-value"
+                    id="trendTotalChange"
+                >
+                    -
+                </div>
+            </div>
+
+
+            <div class="metric">
+                <div class="metric-label">
+                    Interpretation
+                </div>
+
+                <div
+                    class="metric-value small-value"
+                    id="trendInterpretation"
+                >
+                    -
+                </div>
+            </div>
+
+        </div>
 
         <!-- STANDARD IMAGES -->
 
@@ -455,6 +522,25 @@
                 <img
                     id="changeImage"
                     alt="Satellite change map"
+                >
+
+            </div>
+
+        </div>
+        <div
+            class="images-grid single-image hidden"
+            id="trendImagesGrid"
+        >
+
+            <div class="image-card">
+
+                <h3>
+                    Vegetation NDVI Trend
+                </h3>
+
+                <img
+                    id="trendImage"
+                    alt="Vegetation NDVI trend chart"
                 >
 
             </div>
@@ -812,6 +898,79 @@
                 <div class="detail">
                     <span>Interpretation</span>
                     <span id="changeDetailInterpretation">-</span>
+                </div>
+
+            </div>
+
+        </div>
+        <div
+            class="details-grid hidden"
+            id="trendDetailsGrid"
+        >
+
+            <div class="details-card">
+
+                <h3>
+                    Trend Summary
+                </h3>
+
+                <div class="detail">
+                    <span>Requested start</span>
+                    <span id="trendRequestedStart">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>Requested end</span>
+                    <span id="trendRequestedEnd">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>Observations used</span>
+                    <span id="trendObservationCount">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>First mean NDVI</span>
+                    <span id="trendDetailFirst">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>Last mean NDVI</span>
+                    <span id="trendDetailLast">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>Total NDVI change</span>
+                    <span id="trendDetailChange">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>30-day trend slope</span>
+                    <span id="trendSlope30">-</span>
+                </div>
+
+            </div>
+
+
+            <div class="details-card">
+
+                <h3>
+                    Location & Interpretation
+                </h3>
+
+                <div class="detail">
+                    <span>Resolved location</span>
+                    <span id="trendResolvedLocation">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>Coordinates</span>
+                    <span id="trendCoordinates">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>Interpretation</span>
+                    <span id="trendDetailInterpretation">-</span>
                 </div>
 
             </div>

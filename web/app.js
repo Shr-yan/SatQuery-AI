@@ -87,7 +87,20 @@ const changeDetailsGrid =
         "changeDetailsGrid"
     );
 
+const trendMetrics =
+    document.getElementById(
+        "trendMetrics"
+    );
 
+const trendImagesGrid =
+    document.getElementById(
+        "trendImagesGrid"
+    );
+
+const trendDetailsGrid =
+    document.getElementById(
+        "trendDetailsGrid"
+    );
 function imageUrl(
     path
 ) {
@@ -294,6 +307,24 @@ function hideModeSections() {
         );
 
     changeDetailsGrid
+        .classList
+        .add(
+            "hidden"
+        );
+
+    trendMetrics
+        .classList
+        .add(
+            "hidden"
+        );
+
+    trendImagesGrid
+        .classList
+        .add(
+            "hidden"
+        );
+
+    trendDetailsGrid
         .classList
         .add(
             "hidden"
@@ -1116,6 +1147,155 @@ function showChangeResult(
 
 }
 
+function showTrendResult(
+    data
+) {
+
+    trendMetrics
+        .classList
+        .remove(
+            "hidden"
+        );
+
+    trendImagesGrid
+        .classList
+        .remove(
+            "hidden"
+        );
+
+    trendDetailsGrid
+        .classList
+        .remove(
+            "hidden"
+        );
+
+
+    setText(
+        "resultTitle",
+        "Vegetation Trend: "
+        + data.location.requested
+    );
+
+
+    setText(
+        "trendFirstMean",
+        formatNumber(
+            data.trend
+                .first_mean_ndvi
+        )
+    );
+
+    setText(
+        "trendLastMean",
+        formatNumber(
+            data.trend
+                .last_mean_ndvi
+        )
+    );
+
+    setText(
+        "trendTotalChange",
+        formatSignedNumber(
+            data.trend
+                .total_change
+        )
+    );
+
+    setText(
+        "trendInterpretation",
+        data.trend
+            .interpretation
+    );
+
+
+    setText(
+        "trendRequestedStart",
+        data.dates
+            .requested_start
+    );
+
+    setText(
+        "trendRequestedEnd",
+        data.dates
+            .requested_end
+    );
+
+    setText(
+        "trendObservationCount",
+        data.observation_count
+    );
+
+    setText(
+        "trendDetailFirst",
+        formatNumber(
+            data.trend
+                .first_mean_ndvi
+        )
+    );
+
+    setText(
+        "trendDetailLast",
+        formatNumber(
+            data.trend
+                .last_mean_ndvi
+        )
+    );
+
+    setText(
+        "trendDetailChange",
+        formatSignedNumber(
+            data.trend
+                .total_change
+        )
+    );
+
+    setText(
+        "trendSlope30",
+        formatSignedNumber(
+            data.trend
+                .slope_per_30_days,
+            6
+        )
+    );
+
+
+    setText(
+        "trendResolvedLocation",
+        data.location.resolved
+    );
+
+    setText(
+        "trendCoordinates",
+        Number(
+            data.location.latitude
+        ).toFixed(
+            6
+        )
+        + ", "
+        + Number(
+            data.location.longitude
+        ).toFixed(
+            6
+        )
+    );
+
+    setText(
+        "trendDetailInterpretation",
+        data.trend
+            .interpretation
+    );
+
+
+    document
+        .getElementById(
+            "trendImage"
+        )
+        .src = imageUrl(
+            data.outputs
+                .trend_preview
+        );
+
+}
 
 function showResult(
     data
@@ -1135,6 +1315,17 @@ function showResult(
 
 
     if (
+        data.trend_analysis
+        === true
+    ) {
+
+        showTrendResult(
+            data
+        );
+
+    }
+
+    else if (
         data.change_analysis
         === true
     ) {

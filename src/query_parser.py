@@ -112,9 +112,45 @@ def extract_date_range(
     )
 
 
+def detect_trend_request(
+    query,
+):
+
+    query_lower = query.lower()
+
+    trend_terms = [
+        "trend",
+        "trends",
+        "over time",
+        "time series",
+        "timeseries",
+        "progression",
+    ]
+
+    date_start, date_end = (
+        extract_date_range(
+            query
+        )
+    )
+
+    return (
+        date_start is not None
+        and date_end is not None
+        and any(
+            term in query_lower
+            for term in trend_terms
+        )
+    )
+
+
 def detect_change_request(
     query,
 ):
+
+    if detect_trend_request(
+        query
+    ):
+        return False
 
     query_lower = query.lower()
 
@@ -128,7 +164,6 @@ def detect_change_request(
         "changed",
         "increase",
         "decrease",
-        "trend",
         "between",
     ]
 
@@ -138,19 +173,13 @@ def detect_change_request(
         )
     )
 
-    has_two_dates = (
+    return (
         date_start is not None
         and date_end is not None
-    )
-
-    has_change_term = any(
-        term in query_lower
-        for term in change_terms
-    )
-
-    return (
-        has_two_dates
-        and has_change_term
+        and any(
+            term in query_lower
+            for term in change_terms
+        )
     )
 
 
@@ -159,10 +188,6 @@ def detect_analysis_type(
 ):
 
     query_lower = query.lower()
-
-    # -----------------------------
-    # Water / NDWI
-    # -----------------------------
 
     if "ndwi" in query_lower:
         return "ndwi"
@@ -181,10 +206,6 @@ def detect_analysis_type(
         for term in water_terms
     ):
         return "water"
-
-    # -----------------------------
-    # Built-up / NDBI
-    # -----------------------------
 
     if "ndbi" in query_lower:
         return "ndbi"
@@ -208,10 +229,6 @@ def detect_analysis_type(
     ):
         return "urban"
 
-    # -----------------------------
-    # Vegetation / NDVI
-    # -----------------------------
-
     if "ndvi" in query_lower:
         return "ndvi"
 
@@ -220,6 +237,7 @@ def detect_analysis_type(
         "crop health",
         "plant health",
         "greenness",
+        "crop",
     ]
 
     if any(
@@ -228,10 +246,6 @@ def detect_analysis_type(
     ):
         return "vegetation"
 
-    # -----------------------------
-    # Default
-    # -----------------------------
-
     return "imagery"
 
 
@@ -239,7 +253,11 @@ def detect_request_type(
     query,
     analysis_type,
     change_analysis=False,
+    trend_analysis=False,
 ):
+
+    if trend_analysis:
+        return "trend_analysis"
 
     if change_analysis:
         return "change_analysis"
@@ -301,39 +319,35 @@ def extract_location(
 
     cleaned = query.strip()
 
-    patterns = [
-        (
-            r"\b(?:for|in|near|around)\s+"
-            r"([A-Za-z][A-Za-z\s.'-]*?)"
-            r"(?=\s+(?:from|on|between|during|using)\b|$)"
-        ),
-    ]
+    pattern = (
+        r"\b(?:for|in|near|around)\s+"
+        r"([A-Za-z][A-Za-z\s.'-]*?)"
+        r"(?=\s+(?:from|on|between|during|using)\b|$)"
+    )
 
-    for pattern in patterns:
+    match = re.search(
+        pattern,
+        cleaned,
+        flags=re.IGNORECASE,
+    )
 
-        match = re.search(
-            pattern,
-            cleaned,
-            flags=re.IGNORECASE,
-        )
+    if not match:
+        return None
 
-        if not match:
-            continue
+    location = (
+        match.group(1)
+        .strip()
+    )
 
-        location = (
-            match.group(1)
-            .strip()
-        )
+    location = re.sub(
+        r"\s+(?:satellite|imagery|image)$",
+        "",
+        location,
+        flags=re.IGNORECASE,
+    ).strip()
 
-        location = re.sub(
-            r"\s+(?:satellite|imagery|image)$",
-            "",
-            location,
-            flags=re.IGNORECASE,
-        ).strip()
-
-        if location:
-            return location.title()
+    if location:
+        return location.title()
 
     return None
 
@@ -356,19 +370,26 @@ def parse_query(
         )
     )
 
+    trend_analysis = (
+        detect_trend_request(
+            query
+        )
+    )
+
     change_analysis = (
         detect_change_request(
             query
         )
     )
 
-    single_date = (
-        extract_date(
-            query
-        )
+    single_date = extract_date(
+        query
     )
 
-    if change_analysis:
+    if (
+        change_analysis
+        or trend_analysis
+    ):
         single_date = None
 
     return {
@@ -392,6 +413,9 @@ def parse_query(
         "change_analysis":
         change_analysis,
 
+        "trend_analysis":
+        trend_analysis,
+
         "data_type":
         "sentinel-2",
 
@@ -401,6 +425,9 @@ def parse_query(
             analysis_type,
             change_analysis=(
                 change_analysis
+            ),
+            trend_analysis=(
+                trend_analysis
             ),
         ),
 
@@ -413,38 +440,18 @@ if __name__ == "__main__":
 
     tests = [
         (
-            "Analyze vegetation health "
-            "for Varanasi on 2026-02-10"
-        ),
-        (
-            "Show NDWI for Varanasi "
-            "on 2026-02-10"
-        ),
-        (
-            "Show NDBI for New Delhi "
-            "on 2026-03-06"
+            "Analyze vegetation trend in "
+            "Varanasi between "
+            "2026-01-10 and 2026-04-10"
         ),
         (
             "Compare vegetation in "
             "Varanasi between "
-            "2026-02-10 and "
-            "2026-03-10"
+            "2026-02-10 and 2026-03-10"
         ),
         (
-            "Compare NDWI for "
-            "Varanasi between "
-            "2026-02-10 and "
-            "2026-03-10"
-        ),
-        (
-            "Compare NDBI for "
-            "New Delhi between "
-            "2025-12-01 and "
-            "2026-03-06"
-        ),
-        (
-            "Show Sentinel-2 imagery "
-            "for Varanasi on 2026-02-10"
+            "Show NDWI for Varanasi "
+            "on 2026-02-10"
         ),
     ]
 
@@ -456,10 +463,6 @@ if __name__ == "__main__":
 
         print(
             query
-        )
-
-        print(
-            "PARSED:"
         )
 
         print(

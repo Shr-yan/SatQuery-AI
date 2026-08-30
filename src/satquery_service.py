@@ -17,6 +17,10 @@ from query_parser import (
     parse_query,
 )
 
+from trend_analysis import (
+    analyze_vegetation_trend,
+)
+
 
 SUPPORTED_ANALYSES = {
     "ndvi",
@@ -36,61 +40,64 @@ def build_common_sections(
     return {
 
         "location": {
-            "requested": result[
-                "location"
-            ],
+            "requested":
+            result["location"],
 
-            "resolved": result[
-                "resolved_location"
-            ],
+            "resolved":
+            result["resolved_location"],
 
-            "latitude": result[
+            "latitude":
+            result[
                 "coordinates"
             ]["latitude"],
 
-            "longitude": result[
+            "longitude":
+            result[
                 "coordinates"
             ]["longitude"],
         },
 
         "date": {
-            "requested": result[
-                "requested_date"
-            ],
+            "requested":
+            result["requested_date"],
 
-            "selected": result[
-                "scene"
-            ]["date"],
+            "selected":
+            result["scene"]["date"],
 
-            "difference_days": result[
+            "difference_days":
+            result[
                 "date_difference_days"
             ],
         },
 
         "scene": {
-            "id": result[
-                "scene"
-            ]["id"],
+            "id":
+            result["scene"]["id"],
 
-            "tile": result[
+            "tile":
+            result[
                 "scene"
             ].get(
                 "tile"
             ),
 
-            "cloud_cover_percent": result[
+            "cloud_cover_percent":
+            result[
                 "scene"
             ]["cloud_cover"],
 
-            "candidate_count": result[
+            "candidate_count":
+            result[
                 "candidate_scene_count"
             ],
 
-            "rejected_count": result[
+            "rejected_count":
+            result[
                 "rejected_scene_count"
             ],
 
-            "aoi_coverage_percent": (
+            "aoi_coverage_percent":
+            (
                 result[
                     "valid_coverage"
                 ]
@@ -106,49 +113,63 @@ def build_success_response(
     result,
 ):
 
-    common = build_common_sections(
-        result
+    common = (
+        build_common_sections(
+            result
+        )
     )
 
     return {
 
-        "success": True,
+        "success":
+        True,
 
-        "query": query,
+        "query":
+        query,
 
-        "parsed_query": parsed,
+        "parsed_query":
+        parsed,
 
-        "analysis_type": parsed.get(
+        "analysis_type":
+        parsed.get(
             "analysis_type"
         ),
 
-        "change_analysis": False,
+        "change_analysis":
+        False,
+
+        "trend_analysis":
+        False,
 
         **common,
 
         "quality": {
-            "scl_valid_percent": (
+            "scl_valid_percent":
+            (
                 result[
                     "scl_quality"
                 ]["valid_fraction"]
                 * 100.0
             ),
 
-            "cloud_percent": (
+            "cloud_percent":
+            (
                 result[
                     "scl_quality"
                 ]["cloud_fraction"]
                 * 100.0
             ),
 
-            "shadow_percent": (
+            "shadow_percent":
+            (
                 result[
                     "scl_quality"
                 ]["shadow_fraction"]
                 * 100.0
             ),
 
-            "snow_percent": (
+            "snow_percent":
+            (
                 result[
                     "scl_quality"
                 ]["snow_fraction"]
@@ -157,23 +178,28 @@ def build_success_response(
         },
 
         "vegetation": {
-            "mean_ndvi": result[
+            "mean_ndvi":
+            result[
                 "ndvi"
             ]["mean"],
 
-            "min_ndvi": result[
+            "min_ndvi":
+            result[
                 "ndvi"
             ]["min"],
 
-            "max_ndvi": result[
+            "max_ndvi":
+            result[
                 "ndvi"
             ]["max"],
 
-            "std_ndvi": result[
+            "std_ndvi":
+            result[
                 "ndvi"
             ]["std"],
 
-            "valid_pixel_percent": (
+            "valid_pixel_percent":
+            (
                 result[
                     "ndvi"
                 ][
@@ -182,40 +208,45 @@ def build_success_response(
                 * 100.0
             ),
 
-            "condition": result[
+            "condition":
+            result[
                 "ndvi"
             ]["condition"],
         },
 
         "model": {
-            "predicted_mean_ndvi": result[
+            "predicted_mean_ndvi":
+            result[
                 "model"
             ]["prediction"],
 
-            "absolute_difference": result[
+            "absolute_difference":
+            result[
                 "model"
             ][
                 "absolute_difference"
             ],
 
-            "agreement": result[
+            "agreement":
+            result[
                 "model"
             ]["agreement"],
         },
 
         "resolution": {
-            "model": result[
+            "model":
+            result[
                 "resolution"
             ]["model_chip"],
 
-            "display": result[
+            "display":
+            result[
                 "resolution"
             ]["display_chip"],
         },
 
-        "outputs": result[
-            "outputs"
-        ],
+        "outputs":
+        result["outputs"],
 
         "message": (
             "The selected Sentinel-2 "
@@ -228,7 +259,8 @@ def build_success_response(
             f"{result['ndvi']['condition']}."
         ),
 
-        "generated_at": datetime.now(
+        "generated_at":
+        datetime.now(
             timezone.utc
         ).isoformat(),
     }
@@ -240,43 +272,55 @@ def build_imagery_response(
     result,
 ):
 
-    common = build_common_sections(
-        result
+    common = (
+        build_common_sections(
+            result
+        )
     )
 
     return {
 
-        "success": True,
+        "success":
+        True,
 
-        "query": query,
+        "query":
+        query,
 
-        "parsed_query": parsed,
+        "parsed_query":
+        parsed,
 
-        "analysis_type": "imagery",
+        "analysis_type":
+        "imagery",
 
-        "change_analysis": False,
+        "change_analysis":
+        False,
+
+        "trend_analysis":
+        False,
 
         **common,
 
         "resolution": {
-            "display": result[
+            "display":
+            result[
                 "resolution"
             ]["display_chip"],
         },
 
-        "outputs": result[
-            "outputs"
-        ],
+        "outputs":
+        result["outputs"],
 
         "message": (
             "Sentinel-2 RGB imagery "
             "was retrieved for "
             f"{result['location']} "
             "using the observation "
-            f"from {result['scene']['date']}."
+            f"from "
+            f"{result['scene']['date']}."
         ),
 
-        "generated_at": datetime.now(
+        "generated_at":
+        datetime.now(
             timezone.utc
         ).isoformat(),
     }
@@ -288,17 +332,19 @@ def build_environmental_response(
     result,
 ):
 
-    common = build_common_sections(
-        result
+    common = (
+        build_common_sections(
+            result
+        )
     )
 
-    index = result[
-        "index"
-    ]
+    index = (
+        result["index"]
+    )
 
-    index_name = index[
-        "name"
-    ]
+    index_name = (
+        index["name"]
+    )
 
     positive_percent = (
         index[
@@ -309,43 +355,55 @@ def build_environmental_response(
 
     return {
 
-        "success": True,
+        "success":
+        True,
 
-        "query": query,
+        "query":
+        query,
 
-        "parsed_query": parsed,
+        "parsed_query":
+        parsed,
 
-        "analysis_type": result[
+        "analysis_type":
+        result[
             "analysis_type"
         ],
 
-        "change_analysis": False,
+        "change_analysis":
+        False,
+
+        "trend_analysis":
+        False,
 
         **common,
 
         "quality": {
-            "scl_valid_percent": (
+            "scl_valid_percent":
+            (
                 result[
                     "scl_quality"
                 ]["valid_fraction"]
                 * 100.0
             ),
 
-            "cloud_percent": (
+            "cloud_percent":
+            (
                 result[
                     "scl_quality"
                 ]["cloud_fraction"]
                 * 100.0
             ),
 
-            "shadow_percent": (
+            "shadow_percent":
+            (
                 result[
                     "scl_quality"
                 ]["shadow_fraction"]
                 * 100.0
             ),
 
-            "snow_percent": (
+            "snow_percent":
+            (
                 result[
                     "scl_quality"
                 ]["snow_fraction"]
@@ -354,25 +412,23 @@ def build_environmental_response(
         },
 
         "index": {
-            "name": index_name,
+            "name":
+            index_name,
 
-            "mean": index[
-                "mean"
-            ],
+            "mean":
+            index["mean"],
 
-            "min": index[
-                "min"
-            ],
+            "min":
+            index["min"],
 
-            "max": index[
-                "max"
-            ],
+            "max":
+            index["max"],
 
-            "std": index[
-                "std"
-            ],
+            "std":
+            index["std"],
 
-            "valid_pixel_percent": (
+            "valid_pixel_percent":
+            (
                 index[
                     "valid_pixel_fraction"
                 ]
@@ -382,20 +438,21 @@ def build_environmental_response(
             "positive_pixel_percent":
             positive_percent,
 
-            "interpretation": index[
+            "interpretation":
+            index[
                 "interpretation"
             ],
         },
 
         "resolution": {
-            "display": result[
+            "display":
+            result[
                 "resolution"
             ]["display_chip"],
         },
 
-        "outputs": result[
-            "outputs"
-        ],
+        "outputs":
+        result["outputs"],
 
         "message": (
             f"{index_name} analysis for "
@@ -408,7 +465,8 @@ def build_environmental_response(
             f"{index['interpretation']}."
         ),
 
-        "generated_at": datetime.now(
+        "generated_at":
+        datetime.now(
             timezone.utc
         ).isoformat(),
     }
@@ -426,138 +484,164 @@ def build_change_response(
         ].upper()
     )
 
-    before = result[
-        "before"
-    ]
+    before = (
+        result["before"]
+    )
 
-    after = result[
-        "after"
-    ]
+    after = (
+        result["after"]
+    )
 
-    change = result[
-        "change"
-    ]
+    change = (
+        result["change"]
+    )
 
     return {
 
-        "success": True,
+        "success":
+        True,
 
-        "query": query,
+        "query":
+        query,
 
-        "parsed_query": parsed,
+        "parsed_query":
+        parsed,
 
-        "analysis_type": result[
+        "analysis_type":
+        result[
             "analysis_type"
         ],
 
-        "change_analysis": True,
+        "change_analysis":
+        True,
+
+        "trend_analysis":
+        False,
 
         "location": {
-            "requested": result[
-                "location"
-            ],
+            "requested":
+            result["location"],
 
-            "resolved": result[
+            "resolved":
+            result[
                 "resolved_location"
             ],
 
-            "latitude": result[
+            "latitude":
+            result[
                 "coordinates"
             ]["latitude"],
 
-            "longitude": result[
+            "longitude":
+            result[
                 "coordinates"
             ]["longitude"],
         },
 
         "dates": {
-            "requested_start": result[
+            "requested_start":
+            result[
                 "requested_dates"
             ]["start"],
 
-            "requested_end": result[
+            "requested_end":
+            result[
                 "requested_dates"
             ]["end"],
 
-            "selected_start": before[
+            "selected_start":
+            before[
                 "scene"
             ]["date"],
 
-            "selected_end": after[
+            "selected_end":
+            after[
                 "scene"
             ]["date"],
         },
 
         "before": {
-            "scene": before[
-                "scene"
-            ],
+            "scene":
+            before["scene"],
 
-            "coverage_percent": (
+            "coverage_percent":
+            (
                 before[
                     "coverage"
                 ]
                 * 100.0
             ),
 
-            "candidate_count": before[
+            "candidate_count":
+            before[
                 "candidate_count"
             ],
 
-            "rejected_count": before[
+            "rejected_count":
+            before[
                 "rejected_count"
             ],
 
-            "mean": before[
+            "mean":
+            before[
                 "stats"
             ]["mean"],
 
-            "min": before[
+            "min":
+            before[
                 "stats"
             ]["min"],
 
-            "max": before[
+            "max":
+            before[
                 "stats"
             ]["max"],
 
-            "std": before[
+            "std":
+            before[
                 "stats"
             ]["std"],
         },
 
         "after": {
-            "scene": after[
-                "scene"
-            ],
+            "scene":
+            after["scene"],
 
-            "coverage_percent": (
+            "coverage_percent":
+            (
                 after[
                     "coverage"
                 ]
                 * 100.0
             ),
 
-            "candidate_count": after[
+            "candidate_count":
+            after[
                 "candidate_count"
             ],
 
-            "rejected_count": after[
+            "rejected_count":
+            after[
                 "rejected_count"
             ],
 
-            "mean": after[
+            "mean":
+            after[
                 "stats"
             ]["mean"],
 
-            "min": after[
+            "min":
+            after[
                 "stats"
             ]["min"],
 
-            "max": after[
+            "max":
+            after[
                 "stats"
             ]["max"],
 
-            "std": after[
+            "std":
+            after[
                 "stats"
             ]["std"],
         },
@@ -566,68 +650,70 @@ def build_change_response(
             "index_name":
             index_name,
 
-            "mean": change[
-                "mean"
-            ],
+            "mean":
+            change["mean"],
 
-            "min": change[
-                "min"
-            ],
+            "min":
+            change["min"],
 
-            "max": change[
-                "max"
-            ],
+            "max":
+            change["max"],
 
-            "std": change[
-                "std"
-            ],
+            "std":
+            change["std"],
 
-            "increase_percent": (
+            "increase_percent":
+            (
                 change[
                     "increase_fraction"
                 ]
                 * 100.0
             ),
 
-            "decrease_percent": (
+            "decrease_percent":
+            (
                 change[
                     "decrease_fraction"
                 ]
                 * 100.0
             ),
 
-            "stable_percent": (
+            "stable_percent":
+            (
                 change[
                     "stable_fraction"
                 ]
                 * 100.0
             ),
 
-            "valid_pixel_percent": (
+            "valid_pixel_percent":
+            (
                 change[
                     "valid_pixel_fraction"
                 ]
                 * 100.0
             ),
 
-            "threshold": change[
+            "threshold":
+            change[
                 "threshold"
             ],
 
-            "interpretation": change[
+            "interpretation":
+            change[
                 "interpretation"
             ],
         },
 
         "resolution": {
-            "display": result[
+            "display":
+            result[
                 "resolution"
             ]["display_chip"],
         },
 
-        "outputs": result[
-            "outputs"
-        ],
+        "outputs":
+        result["outputs"],
 
         "message": (
             f"{index_name} change analysis "
@@ -636,11 +722,198 @@ def build_change_response(
             f"{change['mean']:+.4f} "
             f"between "
             f"{before['scene']['date']} "
-            f"and {after['scene']['date']}. "
+            f"and "
+            f"{after['scene']['date']}. "
             f"{change['interpretation']}"
         ),
 
-        "generated_at": datetime.now(
+        "generated_at":
+        datetime.now(
+            timezone.utc
+        ).isoformat(),
+    }
+
+
+def build_trend_response(
+    query,
+    parsed,
+    result,
+):
+
+    trend = (
+        result["trend"]
+    )
+
+    observations = []
+
+    for item in result[
+        "observations"
+    ]:
+
+        observations.append(
+            {
+                "requested_date":
+                item[
+                    "requested_date"
+                ],
+
+                "selected_date":
+                item[
+                    "selected_date"
+                ],
+
+                "scene_id":
+                item[
+                    "scene_id"
+                ],
+
+                "tile":
+                item.get(
+                    "tile"
+                ),
+
+                "cloud_cover_percent":
+                item.get(
+                    "cloud_cover"
+                ),
+
+                "coverage_percent":
+                item[
+                    "coverage_percent"
+                ],
+
+                "mean_ndvi":
+                item[
+                    "mean_ndvi"
+                ],
+
+                "min_ndvi":
+                item[
+                    "min_ndvi"
+                ],
+
+                "max_ndvi":
+                item[
+                    "max_ndvi"
+                ],
+
+                "std_ndvi":
+                item[
+                    "std_ndvi"
+                ],
+            }
+        )
+
+    return {
+
+        "success":
+        True,
+
+        "query":
+        query,
+
+        "parsed_query":
+        parsed,
+
+        "analysis_type":
+        "ndvi",
+
+        "change_analysis":
+        False,
+
+        "trend_analysis":
+        True,
+
+        "location": {
+            "requested":
+            result["location"],
+
+            "resolved":
+            result[
+                "resolved_location"
+            ],
+
+            "latitude":
+            result[
+                "coordinates"
+            ]["latitude"],
+
+            "longitude":
+            result[
+                "coordinates"
+            ]["longitude"],
+        },
+
+        "dates": {
+            "requested_start":
+            result[
+                "requested_dates"
+            ]["start"],
+
+            "requested_end":
+            result[
+                "requested_dates"
+            ]["end"],
+        },
+
+        "observation_count":
+        result[
+            "observation_count"
+        ],
+
+        "observations":
+        observations,
+
+        "trend": {
+            "first_mean_ndvi":
+            trend[
+                "first_mean_ndvi"
+            ],
+
+            "last_mean_ndvi":
+            trend[
+                "last_mean_ndvi"
+            ],
+
+            "total_change":
+            trend[
+                "total_change"
+            ],
+
+            "slope_per_day":
+            trend[
+                "slope_per_day"
+            ],
+
+            "slope_per_30_days":
+            trend[
+                "slope_per_30_days"
+            ],
+
+            "interpretation":
+            trend[
+                "interpretation"
+            ],
+        },
+
+        "outputs":
+        result["outputs"],
+
+        "message": (
+            "Vegetation trend analysis "
+            f"for {result['location']} "
+            f"used "
+            f"{result['observation_count']} "
+            "Sentinel-2 observations. "
+            "Mean NDVI changed from "
+            f"{trend['first_mean_ndvi']:.4f} "
+            "to "
+            f"{trend['last_mean_ndvi']:.4f}. "
+            f"{trend['interpretation']}"
+        ),
+
+        "generated_at":
+        datetime.now(
             timezone.utc
         ).isoformat(),
     }
@@ -655,16 +928,21 @@ def build_error_response(
 
     return {
 
-        "success": False,
+        "success":
+        False,
 
-        "query": query,
+        "query":
+        query,
 
-        "parsed_query": parsed,
+        "parsed_query":
+        parsed,
 
         "error": {
-            "type": error_type,
+            "type":
+            error_type,
 
-            "message": message,
+            "message":
+            message,
         },
     }
 
@@ -712,21 +990,69 @@ def execute_query(
                 "unsupported_analysis"
             ),
             message=(
-                "SatQuery currently supports "
-                "Sentinel-2 imagery, NDVI, "
+                "SatQuery currently "
+                "supports imagery, NDVI, "
                 "vegetation, NDWI/water, "
-                "NDBI/urban, and two-date "
-                "change analysis."
+                "NDBI/urban, change "
+                "analysis and vegetation "
+                "trend analysis."
             ),
         )
 
     try:
 
-        # ---------------------------------
-        # TWO-DATE CHANGE ANALYSIS
-        # Must be checked before normal
-        # single-date analysis.
-        # ---------------------------------
+        # -----------------------------
+        # TREND ANALYSIS
+        # -----------------------------
+
+        if parsed.get(
+            "trend_analysis"
+        ):
+
+            if (
+                analysis_type
+                not in {
+                    "ndvi",
+                    "vegetation",
+                }
+            ):
+
+                return build_error_response(
+                    query=query,
+                    parsed=parsed,
+                    error_type=(
+                        "unsupported_trend_analysis"
+                    ),
+                    message=(
+                        "Trend analysis currently "
+                        "supports vegetation / "
+                        "NDVI queries."
+                    ),
+                )
+
+            result = (
+                analyze_vegetation_trend(
+                    location=location,
+
+                    date_start=parsed.get(
+                        "date_start"
+                    ),
+
+                    date_end=parsed.get(
+                        "date_end"
+                    ),
+                )
+            )
+
+            return build_trend_response(
+                query=query,
+                parsed=parsed,
+                result=result,
+            )
+
+        # -----------------------------
+        # CHANGE ANALYSIS
+        # -----------------------------
 
         if parsed.get(
             "change_analysis"
@@ -744,21 +1070,25 @@ def execute_query(
                         "unsupported_change_analysis"
                     ),
                     message=(
-                        "Two-date change analysis "
-                        "currently supports NDVI, "
-                        "vegetation, NDWI/water, "
-                        "and NDBI/urban queries."
+                        "Two-date change "
+                        "analysis currently "
+                        "supports NDVI, "
+                        "vegetation, NDWI/water "
+                        "and NDBI/urban."
                     ),
                 )
 
             result = analyze_change(
                 location=location,
+
                 analysis_type=(
                     analysis_type
                 ),
+
                 date_start=parsed.get(
                     "date_start"
                 ),
+
                 date_end=parsed.get(
                     "date_end"
                 ),
@@ -770,20 +1100,25 @@ def execute_query(
                 result=result,
             )
 
-        # ---------------------------------
+        # -----------------------------
         # IMAGERY
-        # ---------------------------------
+        # -----------------------------
 
         if (
             analysis_type
             == "imagery"
         ):
 
-            result = get_location_imagery(
-                location=location,
-                target_date=parsed.get(
-                    "date"
-                ),
+            result = (
+                get_location_imagery(
+                    location=location,
+
+                    target_date=(
+                        parsed.get(
+                            "date"
+                        )
+                    ),
+                )
             )
 
             return build_imagery_response(
@@ -792,9 +1127,9 @@ def execute_query(
                 result=result,
             )
 
-        # ---------------------------------
+        # -----------------------------
         # NDWI / NDBI
-        # ---------------------------------
+        # -----------------------------
 
         if (
             analysis_type
@@ -809,11 +1144,15 @@ def execute_query(
             result = (
                 analyze_environmental_index(
                     location=location,
+
                     analysis_type=(
                         analysis_type
                     ),
-                    target_date=parsed.get(
-                        "date"
+
+                    target_date=(
+                        parsed.get(
+                            "date"
+                        )
                     ),
                 )
             )
@@ -824,14 +1163,17 @@ def execute_query(
                 result=result,
             )
 
-        # ---------------------------------
+        # -----------------------------
         # NDVI / VEGETATION
-        # ---------------------------------
+        # -----------------------------
 
         result = analyze_location(
             location=location,
-            target_date=parsed.get(
-                "date"
+
+            target_date=(
+                parsed.get(
+                    "date"
+                )
             ),
         )
 
@@ -857,28 +1199,12 @@ def execute_query(
 
 if __name__ == "__main__":
 
-    tests = [
-        (
-            "Compare vegetation in "
-            "Varanasi between "
-            "2026-02-10 and 2026-03-10"
-        ),
-        (
-            "Compare NDBI for "
-            "New Delhi between "
-            "2025-12-01 and 2026-03-06"
-        ),
-    ]
+    response = execute_query(
+        "Analyze vegetation trend "
+        "in Varanasi between "
+        "2026-01-10 and 2026-04-10"
+    )
 
-    for query in tests:
-
-        print(
-            "\nQUERY:",
-            query
-        )
-
-        print(
-            execute_query(
-                query
-            )
-        )
+    print(
+        response
+    )
