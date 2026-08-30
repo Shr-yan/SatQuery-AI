@@ -15,8 +15,10 @@ data/raw/**/*.npy
 data/processed/**/*.tif
 data/processed/**/*.npy
 
-# ML generated model
-data/processed/*.pth
+
+# Extra model checkpoints
+data/processed/satellite_cnn.pth
+data/processed/satquery_multiscene_best.pth
 
 # Generated previews/results
 data/processed/results/

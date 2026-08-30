@@ -6,9 +6,18 @@ import torch
 from model import SatelliteCNN
 
 
+PROJECT_ROOT = (
+    Path(__file__)
+    .resolve()
+    .parent
+    .parent
+)
+
 DEFAULT_MODEL_PATH = (
-    "data/processed/"
-    "satquery_geographic_best.pth"
+    PROJECT_ROOT
+    / "data"
+    / "processed"
+    / "satquery_geographic_best.pth"
 )
 
 
