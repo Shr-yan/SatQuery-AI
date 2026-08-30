@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 
 from live_analysis import (
     analyze_location,
+    get_location_imagery,
 )
 
 from query_parser import (
@@ -12,6 +13,7 @@ from query_parser import (
 SUPPORTED_ANALYSES = {
     "ndvi",
     "vegetation",
+    "imagery",
 }
 
 
@@ -252,6 +254,137 @@ def build_success_response(
     }
 
 
+def build_imagery_response(
+    query,
+    parsed,
+    result,
+):
+
+    return {
+
+        "success": True,
+
+        "query": query,
+
+        "parsed_query": parsed,
+
+        "analysis_type": "imagery",
+
+        "location": {
+            "requested": (
+                result["location"]
+            ),
+
+            "resolved": (
+                result[
+                    "resolved_location"
+                ]
+            ),
+
+            "latitude": (
+                result[
+                    "coordinates"
+                ]["latitude"]
+            ),
+
+            "longitude": (
+                result[
+                    "coordinates"
+                ]["longitude"]
+            ),
+        },
+
+        "date": {
+            "requested": (
+                result[
+                    "requested_date"
+                ]
+            ),
+
+            "selected": (
+                result[
+                    "scene"
+                ]["date"]
+            ),
+
+            "difference_days": (
+                result[
+                    "date_difference_days"
+                ]
+            ),
+        },
+
+        "scene": {
+            "id": (
+                result[
+                    "scene"
+                ]["id"]
+            ),
+
+            "tile": (
+                result[
+                    "scene"
+                ].get(
+                    "tile"
+                )
+            ),
+
+            "cloud_cover_percent": (
+                result[
+                    "scene"
+                ]["cloud_cover"]
+            ),
+
+            "candidate_count": (
+                result[
+                    "candidate_scene_count"
+                ]
+            ),
+
+            "rejected_count": (
+                result[
+                    "rejected_scene_count"
+                ]
+            ),
+
+            "aoi_coverage_percent": (
+                result[
+                    "valid_coverage"
+                ]
+                * 100.0
+            ),
+        },
+
+        "resolution": {
+            "display": (
+                result[
+                    "resolution"
+                ]["display_chip"]
+            ),
+        },
+
+        "outputs": (
+            result[
+                "outputs"
+            ]
+        ),
+
+        "message": (
+            "Sentinel-2 RGB imagery "
+            "was retrieved for "
+            f"{result['location']} "
+            "using the observation "
+            f"from {result['scene']['date']}."
+        ),
+
+        "generated_at": (
+            datetime.now(
+                timezone.utc
+            ).isoformat()
+        ),
+    }
+
+
 def build_error_response(
     query,
     parsed,
@@ -322,13 +455,31 @@ def execute_query(
                 "unsupported_analysis"
             ),
             message=(
-                "This SatQuery pipeline "
-                "currently supports NDVI "
-                "and vegetation analysis."
+                "SatQuery currently "
+                "supports Sentinel-2 "
+                "imagery, NDVI, and "
+                "vegetation analysis."
             ),
         )
 
     try:
+
+        if analysis_type == "imagery":
+
+            result = get_location_imagery(
+                location=location,
+                target_date=(
+                    parsed.get(
+                        "date"
+                    )
+                ),
+            )
+
+            return build_imagery_response(
+                query=query,
+                parsed=parsed,
+                result=result,
+            )
 
         result = analyze_location(
             location=location,
@@ -362,7 +513,7 @@ def execute_query(
 if __name__ == "__main__":
 
     response = execute_query(
-        "Analyze vegetation health "
+        "Show Sentinel-2 imagery "
         "for Varanasi on 2026-02-10"
     )
 

@@ -36,6 +36,14 @@ from result_export import (
     save_result_json,
 )
 
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+RESULTS_DIR = (
+    PROJECT_ROOT
+    / "data"
+    / "processed"
+    / "results"
+)
 
 MIN_VALID_COVERAGE = 0.90
 
@@ -450,9 +458,7 @@ def analyze_location(
     )
 
     result_folder = (
-        Path(
-            "data/processed/results"
-        )
+        RESULTS_DIR
         / (
             f"{safe_location}_"
             f"{scene_date}"
@@ -670,3 +676,278 @@ if __name__ == "__main__":
         "Outputs:",
         result["outputs"]
     )
+
+def get_location_imagery(
+    location,
+    target_date=None,
+    size_km=5,
+):
+    """
+    Retrieve Sentinel-2 RGB imagery for a location
+    without running NDVI or CNN analysis.
+    """
+
+    # -----------------------------
+    # 1. Geocode
+    # -----------------------------
+
+    coordinates = geocode_location(
+        location
+    )
+
+    if not coordinates:
+        raise ValueError(
+            f"Could not geocode location: "
+            f"{location}"
+        )
+
+    # -----------------------------
+    # 2. Build AOI
+    # -----------------------------
+
+    bbox_dict = create_bbox(
+        coordinates["latitude"],
+        coordinates["longitude"],
+        size_km=size_km,
+    )
+
+    stac_bbox = [
+        bbox_dict["min_lon"],
+        bbox_dict["min_lat"],
+        bbox_dict["max_lon"],
+        bbox_dict["max_lat"],
+    ]
+
+    # -----------------------------
+    # 3. Search Sentinel-2
+    # -----------------------------
+
+    scenes = search_sentinel2(
+        bbox=stac_bbox,
+        target_date=target_date,
+    )
+
+    if not scenes:
+        raise RuntimeError(
+            "No suitable Sentinel-2 "
+            "scenes were found."
+        )
+
+    ranked_scenes = rank_scenes(
+        scenes,
+        target_date=target_date,
+    )
+
+    scene_info = None
+    band_urls = None
+    valid_coverage = None
+    rejected_scenes = []
+
+    # -----------------------------
+    # 4. AOI-aware selection
+    # -----------------------------
+
+    for candidate in ranked_scenes:
+
+        candidate_info = get_scene_info(
+            candidate
+        )
+
+        try:
+
+            candidate_urls = (
+                get_signed_band_urls(
+                    candidate
+                )
+            )
+
+            candidate_model_chip = (
+                build_model_chip(
+                    candidate_urls,
+                    stac_bbox,
+                )
+            )
+
+            candidate_quality = (
+                summarize_chip_quality(
+                    candidate_model_chip
+                )
+            )
+
+            candidate_valid_coverage = (
+                1.0
+                - candidate_quality[
+                    "zero_fraction"
+                ]
+            )
+
+            if (
+                candidate_valid_coverage
+                < MIN_VALID_COVERAGE
+            ):
+
+                rejected_scenes.append(
+                    {
+                        "id": candidate_info[
+                            "id"
+                        ],
+                        "date": candidate_info[
+                            "date"
+                        ],
+                        "reason":
+                        "insufficient_coverage",
+                        "valid_fraction":
+                        candidate_valid_coverage,
+                    }
+                )
+
+                continue
+
+            scene_info = candidate_info
+            band_urls = candidate_urls
+            valid_coverage = (
+                candidate_valid_coverage
+            )
+
+            break
+
+        except Exception as error:
+
+            rejected_scenes.append(
+                {
+                    "id": candidate_info[
+                        "id"
+                    ],
+                    "date": candidate_info[
+                        "date"
+                    ],
+                    "reason": "read_error",
+                    "error": str(error),
+                }
+            )
+
+    if scene_info is None:
+
+        raise RuntimeError(
+            "No Sentinel-2 candidate "
+            "provided at least 90% "
+            "valid AOI coverage."
+        )
+
+    # -----------------------------
+    # 5. Date difference
+    # -----------------------------
+
+    date_difference_days = None
+
+    if target_date:
+
+        requested = datetime.strptime(
+            target_date,
+            "%Y-%m-%d",
+        ).date()
+
+        selected = datetime.strptime(
+            scene_info["date"],
+            "%Y-%m-%d",
+        ).date()
+
+        date_difference_days = abs(
+            (selected - requested).days
+        )
+
+    # -----------------------------
+    # 6. High-resolution RGB chip
+    # -----------------------------
+
+    display_chip = build_display_chip(
+        band_urls,
+        stac_bbox,
+    )
+
+    # -----------------------------
+    # 7. Output folder
+    # -----------------------------
+
+    safe_location = (
+        location.lower()
+        .replace(" ", "_")
+        .replace(",", "")
+    )
+
+    scene_date = scene_info["date"]
+
+    result_folder = (
+        RESULTS_DIR
+        / (
+            f"{safe_location}_"
+            f"{scene_date}"
+        )
+    )
+
+    result_folder.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    rgb_output = (
+        result_folder
+        / "rgb.png"
+    )
+
+    create_rgb_preview(
+        display_chip,
+        rgb_output,
+    )
+
+    # -----------------------------
+    # 8. Result
+    # -----------------------------
+
+    result = {
+        "location": location,
+
+        "resolved_location":
+        coordinates.get(
+            "name",
+            location,
+        ),
+
+        "coordinates": coordinates,
+
+        "bbox": bbox_dict,
+
+        "requested_date": target_date,
+
+        "scene": scene_info,
+
+        "candidate_scene_count":
+        len(scenes),
+
+        "rejected_scene_count":
+        len(rejected_scenes),
+
+        "rejected_scenes":
+        rejected_scenes,
+
+        "valid_coverage":
+        valid_coverage,
+
+        "date_difference_days":
+        date_difference_days,
+
+        "resolution": {
+            "display_chip":
+            DISPLAY_CHIP_SIZE,
+        },
+
+        "outputs": {
+            "folder":
+            str(result_folder),
+
+            "rgb_preview":
+            str(rgb_output),
+        },
+    }
+
+    return result

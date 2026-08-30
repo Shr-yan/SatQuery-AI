@@ -195,6 +195,10 @@
             margin-top: 25px;
         }
 
+        .images-grid.single-image {
+            grid-template-columns: 1fr;
+        }
+
         .image-card {
             background: white;
             padding: 16px;
@@ -257,6 +261,10 @@
             overflow-wrap: anywhere;
         }
 
+        .hidden {
+            display: none !important;
+        }
+
         footer {
             text-align: center;
             padding: 30px;
@@ -316,7 +324,7 @@
                 id="queryInput"
                 type="text"
                 value="Analyze vegetation health for Varanasi on 2026-02-10"
-                placeholder="Ask about vegetation, NDVI, location and date..."
+                placeholder="Ask for imagery, NDVI or vegetation analysis..."
             >
 
             <button id="analyzeButton">
@@ -331,7 +339,14 @@
                 class="example-button"
                 data-query="Analyze vegetation health for Varanasi on 2026-02-10"
             >
-                Varanasi
+                Varanasi NDVI
+            </button>
+
+            <button
+                class="example-button"
+                data-query="Show Sentinel-2 imagery for Varanasi on 2026-02-10"
+            >
+                Varanasi Imagery
             </button>
 
             <button
@@ -375,7 +390,10 @@
         </div>
 
 
-        <div class="metrics">
+        <div
+            class="metrics"
+            id="analysisMetrics"
+        >
 
             <div class="metric">
                 <div class="metric-label">
@@ -435,7 +453,73 @@
         </div>
 
 
-        <div class="images-grid">
+        <div
+            class="metrics hidden"
+            id="imageryMetrics"
+        >
+
+            <div class="metric">
+                <div class="metric-label">
+                    Selected Date
+                </div>
+
+                <div
+                    class="metric-value"
+                    id="imagerySelectedDate"
+                >
+                    -
+                </div>
+            </div>
+
+
+            <div class="metric">
+                <div class="metric-label">
+                    Scene Cloud Cover
+                </div>
+
+                <div
+                    class="metric-value"
+                    id="imageryCloud"
+                >
+                    -
+                </div>
+            </div>
+
+
+            <div class="metric">
+                <div class="metric-label">
+                    AOI Coverage
+                </div>
+
+                <div
+                    class="metric-value"
+                    id="imageryCoverage"
+                >
+                    -
+                </div>
+            </div>
+
+
+            <div class="metric">
+                <div class="metric-label">
+                    Resolution
+                </div>
+
+                <div
+                    class="metric-value"
+                    id="imageryResolution"
+                >
+                    -
+                </div>
+            </div>
+
+        </div>
+
+
+        <div
+            class="images-grid"
+            id="imagesGrid"
+        >
 
             <div class="image-card">
 
@@ -451,7 +535,10 @@
             </div>
 
 
-            <div class="image-card">
+            <div
+                class="image-card"
+                id="ndviImageCard"
+            >
 
                 <h3>
                     Quality-Masked NDVI
@@ -496,6 +583,11 @@
                 </div>
 
                 <div class="detail">
+                    <span>Date difference</span>
+                    <span id="dateDifference">-</span>
+                </div>
+
+                <div class="detail">
                     <span>MGRS tile</span>
                     <span id="tile">-</span>
                 </div>
@@ -505,10 +597,23 @@
                     <span id="coverage">-</span>
                 </div>
 
+                <div class="detail">
+                    <span>Candidate scenes</span>
+                    <span id="candidateCount">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>Rejected scenes</span>
+                    <span id="rejectedCount">-</span>
+                </div>
+
             </div>
 
 
-            <div class="details-card">
+            <div
+                class="details-card"
+                id="scientificDetails"
+            >
 
                 <h3>
                     Scientific & ML Details
@@ -546,6 +651,38 @@
 
             </div>
 
+
+            <div
+                class="details-card hidden"
+                id="imageryDetails"
+            >
+
+                <h3>
+                    Imagery Details
+                </h3>
+
+                <div class="detail">
+                    <span>Scene ID</span>
+                    <span id="imagerySceneId">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>Scene cloud cover</span>
+                    <span id="imagerySceneCloud">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>Display resolution</span>
+                    <span id="displayResolution">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>Request type</span>
+                    <span>Sentinel-2 RGB imagery</span>
+                </div>
+
+            </div>
+
         </div>
 
     </section>
@@ -555,7 +692,7 @@
 
 <footer>
     <b>SatQuery AI</b> — Sentinel-2 remote-sensing
-     analysis made by <b>Shreyansh</b> <!-- through natural-language queries -->
+    analysis made by <b>Shreyansh</b>
 </footer>
 
 
@@ -579,6 +716,36 @@
     const results =
         document.getElementById(
             "results"
+        );
+
+    const analysisMetrics =
+        document.getElementById(
+            "analysisMetrics"
+        );
+
+    const imageryMetrics =
+        document.getElementById(
+            "imageryMetrics"
+        );
+
+    const scientificDetails =
+        document.getElementById(
+            "scientificDetails"
+        );
+
+    const imageryDetails =
+        document.getElementById(
+            "imageryDetails"
+        );
+
+    const ndviImageCard =
+        document.getElementById(
+            "ndviImageCard"
+        );
+
+    const imagesGrid =
+        document.getElementById(
+            "imagesGrid"
         );
 
 
@@ -608,6 +775,13 @@
         value
     ) {
 
+        if (
+            value === null
+            || value === undefined
+        ) {
+            return "-";
+        }
+
         return (
             Number(value).toFixed(2)
             + "%"
@@ -616,20 +790,120 @@
     }
 
 
-    function showResult(data) {
+    function formatDateDifference(
+        value
+    ) {
 
-        results.style.display =
-            "block";
+        if (
+            value === null
+            || value === undefined
+        ) {
+            return "-";
+        }
+
+        return (
+            value
+            + (
+                value === 1
+                ? " day"
+                : " days"
+            )
+        );
+
+    }
+
+
+    function fillCommonDetails(
+        data
+    ) {
 
         setText(
-            "resultTitle",
-            "Analysis: "
-            + data.location.requested
+            "resolvedLocation",
+            data.location.resolved
         );
 
         setText(
-            "resultMessage",
-            data.message
+            "coordinates",
+            data.location.latitude.toFixed(6)
+            + ", "
+            + data.location.longitude.toFixed(6)
+        );
+
+        setText(
+            "requestedDate",
+            data.date.requested || "-"
+        );
+
+        setText(
+            "selectedDate",
+            data.date.selected || "-"
+        );
+
+        setText(
+            "dateDifference",
+            formatDateDifference(
+                data.date.difference_days
+            )
+        );
+
+        setText(
+            "tile",
+            data.scene.tile || "-"
+        );
+
+        setText(
+            "coverage",
+            formatPercent(
+                data.scene
+                    .aoi_coverage_percent
+            )
+        );
+
+        setText(
+            "candidateCount",
+            data.scene.candidate_count
+        );
+
+        setText(
+            "rejectedCount",
+            data.scene.rejected_count
+        );
+
+    }
+
+
+    function showAnalysisResult(
+        data
+    ) {
+
+        analysisMetrics.classList.remove(
+            "hidden"
+        );
+
+        imageryMetrics.classList.add(
+            "hidden"
+        );
+
+        scientificDetails.classList.remove(
+            "hidden"
+        );
+
+        imageryDetails.classList.add(
+            "hidden"
+        );
+
+        ndviImageCard.classList.remove(
+            "hidden"
+        );
+
+        imagesGrid.classList.remove(
+            "single-image"
+        );
+
+        setText(
+            "resultTitle",
+            "Vegetation Analysis: "
+            + data.location.requested
         );
 
         setText(
@@ -654,40 +928,6 @@
             "agreement",
             data.model.agreement
                 .toUpperCase()
-        );
-
-        setText(
-            "resolvedLocation",
-            data.location.resolved
-        );
-
-        setText(
-            "coordinates",
-            data.location.latitude.toFixed(6)
-            + ", "
-            + data.location.longitude.toFixed(6)
-        );
-
-        setText(
-            "requestedDate",
-            data.date.requested
-        );
-
-        setText(
-            "selectedDate",
-            data.date.selected
-        );
-
-        setText(
-            "tile",
-            data.scene.tile || "-"
-        );
-
-        setText(
-            "coverage",
-            formatPercent(
-                data.scene.aoi_coverage_percent
-            )
         );
 
         setText(
@@ -742,6 +982,142 @@
             data.outputs.ndvi_preview
         );
 
+    }
+
+
+    function showImageryResult(
+        data
+    ) {
+
+        analysisMetrics.classList.add(
+            "hidden"
+        );
+
+        imageryMetrics.classList.remove(
+            "hidden"
+        );
+
+        scientificDetails.classList.add(
+            "hidden"
+        );
+
+        imageryDetails.classList.remove(
+            "hidden"
+        );
+
+        ndviImageCard.classList.add(
+            "hidden"
+        );
+
+        imagesGrid.classList.add(
+            "single-image"
+        );
+
+        setText(
+            "resultTitle",
+            "Sentinel-2 Imagery: "
+            + data.location.requested
+        );
+
+        setText(
+            "imagerySelectedDate",
+            data.date.selected || "-"
+        );
+
+        setText(
+            "imageryCloud",
+            formatPercent(
+                data.scene
+                    .cloud_cover_percent
+            )
+        );
+
+        setText(
+            "imageryCoverage",
+            formatPercent(
+                data.scene
+                    .aoi_coverage_percent
+            )
+        );
+
+        setText(
+            "imageryResolution",
+            data.resolution.display
+            + " × "
+            + data.resolution.display
+        );
+
+        setText(
+            "imagerySceneId",
+            data.scene.id
+        );
+
+        setText(
+            "imagerySceneCloud",
+            formatPercent(
+                data.scene
+                    .cloud_cover_percent
+            )
+        );
+
+        setText(
+            "displayResolution",
+            data.resolution.display
+            + " × "
+            + data.resolution.display
+            + " px"
+        );
+
+        document.getElementById(
+            "rgbImage"
+        ).src = imageUrl(
+            data.outputs.rgb_preview
+        );
+
+        document.getElementById(
+            "ndviImage"
+        ).removeAttribute(
+            "src"
+        );
+
+    }
+
+
+    function showResult(
+        data
+    ) {
+
+        results.style.display =
+            "block";
+
+        setText(
+            "resultMessage",
+            data.message
+        );
+
+        fillCommonDetails(
+            data
+        );
+
+        if (
+            data.analysis_type
+            === "imagery"
+        ) {
+
+            showImageryResult(
+                data
+            );
+
+        }
+
+        else {
+
+            showAnalysisResult(
+                data
+            );
+
+        }
+
         results.scrollIntoView(
             {
                 behavior: "smooth",
@@ -773,10 +1149,14 @@
         analyzeButton.textContent =
             "Analyzing...";
 
+        results.style.display =
+            "none";
+
         statusBox.innerHTML =
             '<div class="loading">'
-            + 'Searching Sentinel-2 and '
-            + 'running analysis...'
+            + 'Searching Sentinel-2 '
+            + 'imagery and processing '
+            + 'your request...'
             + '</div>';
 
         try {
