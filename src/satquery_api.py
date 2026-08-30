@@ -1,5 +1,7 @@
 from pathlib import Path
-
+from fastapi.staticfiles import (
+    StaticFiles,
+)
 from fastapi import (
     FastAPI,
     HTTPException,
@@ -47,11 +49,20 @@ app = FastAPI(
     title="SatQuery AI API",
     description=(
         "Natural-language Sentinel-2 "
-        "satellite analysis service."
+        "satellite imagery and "
+        "environmental analysis service."
     ),
-    version="0.2.0",
+    version="0.3.0",
 )
-
+app.mount(
+    "/static",
+    StaticFiles(
+        directory=str(
+            WEB_DIR
+        )
+    ),
+    name="static",
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -90,14 +101,29 @@ class QueryRequest(
 def root():
 
     return {
-        "name": "SatQuery AI",
-        "status": "running",
-        "version": "0.2.0",
-        "web_app": "/app",
-        "documentation": "/docs",
+        "name":
+        "SatQuery AI",
+
+        "status":
+        "running",
+
+        "version":
+        "0.3.0",
+
+        "web_app":
+        "/app",
+
+        "documentation":
+        "/docs",
+
         "supported_analysis": [
+            "Sentinel-2 RGB imagery",
             "NDVI",
             "vegetation",
+            "NDWI",
+            "water",
+            "NDBI",
+            "urban",
         ],
     }
 
@@ -106,7 +132,11 @@ def root():
 def health():
 
     return {
-        "status": "healthy"
+        "status":
+        "healthy",
+
+        "version":
+        "0.3.0",
     }
 
 
@@ -154,11 +184,15 @@ def analyze(
             status_code=400,
             detail={
                 "type": (
-                    error["type"]
+                    error[
+                        "type"
+                    ]
                 ),
 
                 "message": (
-                    error["message"]
+                    error[
+                        "message"
+                    ]
                 ),
             },
         )
@@ -175,7 +209,10 @@ def result_image(
         path
     )
 
-    if not requested_path.is_absolute():
+    if (
+        not
+        requested_path.is_absolute()
+    ):
 
         requested_path = (
             PROJECT_ROOT

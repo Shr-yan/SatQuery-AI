@@ -1,4 +1,8 @@
-from datetime import datetime, timedelta
+from datetime import (
+    datetime,
+    timedelta,
+    timezone,
+)
 
 import planetary_computer
 from pystac_client import Client
@@ -11,12 +15,27 @@ STAC_URL = (
 
 COLLECTION = "sentinel-2-l2a"
 
+
+# Reflectance bands SatQuery may use.
+#
+# B02 = Blue
+# B03 = Green
+# B04 = Red
+# B08 = NIR
+# B11 = SWIR
+#
+# IMPORTANT:
+# Adding B11 here does NOT change the
+# CNN input. live_chip.py still feeds only
+# B02/B03/B04/B08 to the trained model.
 REQUIRED_BANDS = [
     "B02",
     "B03",
     "B04",
     "B08",
+    "B11",
 ]
+
 
 QUALITY_BAND = "SCL"
 
@@ -62,7 +81,9 @@ def search_sentinel2(
 
     else:
 
-        end = datetime.utcnow()
+        end = datetime.now(
+            timezone.utc
+        )
 
         start = (
             end
@@ -101,15 +122,16 @@ def search_sentinel2(
 
         assets = item.assets
 
+        # Require all reflectance bands
+        # needed by SatQuery analyses.
         if not all(
             band in assets
             for band in REQUIRED_BANDS
         ):
             continue
 
-        # SCL is now required because
-        # SatQuery uses it for pixel-level
-        # quality masking.
+        # SCL is required for pixel-level
+        # cloud/shadow/snow masking.
         if QUALITY_BAND not in assets:
             continue
 
@@ -162,11 +184,20 @@ def select_best_scene(
     )
 
 
-def get_signed_band_urls(item):
+def get_signed_band_urls(
+    item,
+):
 
     urls = {}
 
     for band in REQUIRED_BANDS:
+
+        if band not in item.assets:
+
+            raise KeyError(
+                "Selected Sentinel-2 "
+                f"scene is missing {band}."
+            )
 
         asset = item.assets[
             band
@@ -181,7 +212,9 @@ def get_signed_band_urls(item):
     return urls
 
 
-def get_signed_scl_url(item):
+def get_signed_scl_url(
+    item,
+):
 
     if QUALITY_BAND not in item.assets:
 
@@ -197,7 +230,9 @@ def get_signed_scl_url(item):
     )
 
 
-def get_scene_info(item):
+def get_scene_info(
+    item,
+):
 
     cloud_cover = (
         item.properties.get(
@@ -224,28 +259,31 @@ def get_scene_info(item):
         ),
 
         "cloud_cover": (
-            float(cloud_cover)
+            float(
+                cloud_cover
+            )
             if cloud_cover
             is not None
             else None
         ),
 
-        "tile": tile,
+        "tile":
+        tile,
     }
 
 
 if __name__ == "__main__":
 
     test_bbox = [
-        80.90,
-        26.80,
-        80.97,
-        26.88,
+        82.95,
+        25.29,
+        83.06,
+        25.39,
     ]
 
     scenes = search_sentinel2(
         bbox=test_bbox,
-        target_date="2026-01-15",
+        target_date="2026-02-10",
     )
 
     print(
@@ -257,21 +295,32 @@ if __name__ == "__main__":
 
         best = select_best_scene(
             scenes,
-            target_date="2026-01-15",
+            target_date="2026-02-10",
         )
 
         print(
             "Best scene:",
-            get_scene_info(best)
+            get_scene_info(
+                best
+            )
+        )
+
+        urls = (
+            get_signed_band_urls(
+                best
+            )
         )
 
         print(
-            "Bands:",
+            "Available analysis bands:",
             list(
-                get_signed_band_urls(
-                    best
-                ).keys()
+                urls.keys()
             )
+        )
+
+        print(
+            "B11 available:",
+            "B11" in urls
         )
 
         print(

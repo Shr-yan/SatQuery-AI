@@ -8,12 +8,17 @@ from rasterio.windows import (
 )
 
 
+# IMPORTANT:
+# Keep these four bands unchanged.
+# The trained CNN expects exactly
+# B02, B03, B04 and B08.
 BAND_ORDER = [
     "B02",
     "B03",
     "B04",
     "B08",
 ]
+
 
 MODEL_CHIP_SIZE = 256
 DISPLAY_CHIP_SIZE = 768
@@ -67,6 +72,41 @@ def read_band_chip(
             boundless=True,
             fill_value=0,
         )
+
+    return data
+
+
+def read_reflectance_band(
+    url,
+    bbox,
+    chip_size=DISPLAY_CHIP_SIZE,
+):
+    """
+    Read one Sentinel-2 reflectance band
+    and convert it to scaled reflectance.
+
+    This is also used for B11, which has
+    a native 20 m resolution. Rasterio
+    resamples it to the requested chip size.
+    """
+
+    data = read_band_chip(
+        url,
+        bbox,
+        chip_size=chip_size,
+    )
+
+    data = data.astype(
+        np.float32
+    )
+
+    data /= 10000.0
+
+    data = np.clip(
+        data,
+        0.0,
+        1.0,
+    )
 
     return data
 
@@ -200,6 +240,88 @@ def build_scl_valid_mask(
     return valid
 
 
+def calculate_normalized_difference(
+    band_a,
+    band_b,
+    valid_mask=None,
+):
+    """
+    Generic normalized difference:
+
+        (band_a - band_b)
+        -----------------
+        (band_a + band_b)
+    """
+
+    if (
+        band_a.shape
+        != band_b.shape
+    ):
+        raise ValueError(
+            "Index bands must have "
+            "the same shape."
+        )
+
+    denominator = (
+        band_a + band_b
+    )
+
+    raster_valid = (
+        (
+            band_a > 0
+        )
+        | (
+            band_b > 0
+        )
+    )
+
+    valid = (
+        raster_valid
+        & np.isfinite(
+            band_a
+        )
+        & np.isfinite(
+            band_b
+        )
+        & (
+            np.abs(
+                denominator
+            )
+            > 1e-6
+        )
+    )
+
+    if valid_mask is not None:
+
+        if (
+            valid_mask.shape
+            != band_a.shape
+        ):
+            raise ValueError(
+                "Validity mask has "
+                "incorrect shape."
+            )
+
+        valid &= valid_mask
+
+    index = np.full(
+        band_a.shape,
+        np.nan,
+        dtype=np.float32,
+    )
+
+    index[valid] = (
+        (
+            band_a[valid]
+            - band_b[valid]
+        )
+        /
+        denominator[valid]
+    )
+
+    return index
+
+
 def calculate_chip_ndvi(
     chip,
     valid_mask=None,
@@ -214,80 +336,105 @@ def calculate_chip_ndvi(
     red = chip[2]
     nir = chip[3]
 
-    raster_valid = np.any(
-        chip > 0,
-        axis=0,
-    )
-
-    denominator = (
-        nir + red
-    )
-
-    valid = (
-        raster_valid
-        & np.isfinite(red)
-        & np.isfinite(nir)
-        & (
-            np.abs(
-                denominator
-            )
-            > 1e-6
-        )
-    )
-
-    if valid_mask is not None:
-
-        if (
-            valid_mask.shape
-            != red.shape
-        ):
-
-            raise ValueError(
-                "NDVI validity mask has "
-                "incorrect shape."
-            )
-
-        valid &= valid_mask
-
-    ndvi = np.full(
-        red.shape,
-        np.nan,
-        dtype=np.float32,
-    )
-
-    ndvi[valid] = (
-        (
-            nir[valid]
-            - red[valid]
-        )
-        /
-        denominator[valid]
-    )
-
-    return ndvi
-
-
-def summarize_chip_ndvi(
-    chip,
-    valid_mask=None,
-):
-
-    ndvi = calculate_chip_ndvi(
-        chip,
+    return calculate_normalized_difference(
+        nir,
+        red,
         valid_mask=valid_mask,
     )
 
+
+def calculate_chip_ndwi(
+    chip,
+    valid_mask=None,
+):
+    """
+    McFeeters NDWI:
+
+        (Green - NIR)
+        -------------
+        (Green + NIR)
+
+    Sentinel-2:
+        Green = B03
+        NIR   = B08
+    """
+
+    if chip.shape[0] != 4:
+
+        raise ValueError(
+            "Expected four bands."
+        )
+
+    green = chip[1]
+    nir = chip[3]
+
+    return calculate_normalized_difference(
+        green,
+        nir,
+        valid_mask=valid_mask,
+    )
+
+
+def calculate_chip_ndbi(
+    chip,
+    swir,
+    valid_mask=None,
+):
+    """
+    NDBI:
+
+        (SWIR - NIR)
+        ------------
+        (SWIR + NIR)
+
+    Sentinel-2:
+        NIR  = B08
+        SWIR = B11
+
+    B11 is supplied separately so the
+    four-band CNN input remains unchanged.
+    """
+
+    if chip.shape[0] != 4:
+
+        raise ValueError(
+            "Expected four-band "
+            "Sentinel-2 chip."
+        )
+
+    nir = chip[3]
+
+    if (
+        swir.shape
+        != nir.shape
+    ):
+        raise ValueError(
+            "B11/SWIR shape must match "
+            "the Sentinel-2 chip."
+        )
+
+    return calculate_normalized_difference(
+        swir,
+        nir,
+        valid_mask=valid_mask,
+    )
+
+
+def summarize_index(
+    index,
+):
+
     valid = np.isfinite(
-        ndvi
+        index
     )
 
     if not np.any(valid):
 
         raise ValueError(
-            "No valid NDVI pixels found."
+            "No valid index pixels found."
         )
 
-    values = ndvi[
+    values = index[
         valid
     ]
 
@@ -314,6 +461,53 @@ def summarize_chip_ndvi(
     }
 
 
+def summarize_chip_ndvi(
+    chip,
+    valid_mask=None,
+):
+
+    ndvi = calculate_chip_ndvi(
+        chip,
+        valid_mask=valid_mask,
+    )
+
+    return summarize_index(
+        ndvi
+    )
+
+
+def summarize_chip_ndwi(
+    chip,
+    valid_mask=None,
+):
+
+    ndwi = calculate_chip_ndwi(
+        chip,
+        valid_mask=valid_mask,
+    )
+
+    return summarize_index(
+        ndwi
+    )
+
+
+def summarize_chip_ndbi(
+    chip,
+    swir,
+    valid_mask=None,
+):
+
+    ndbi = calculate_chip_ndbi(
+        chip,
+        swir,
+        valid_mask=valid_mask,
+    )
+
+    return summarize_index(
+        ndbi
+    )
+
+
 def summarize_chip_quality(
     chip,
 ):
@@ -330,12 +524,16 @@ def summarize_chip_quality(
     )
 
     zero_fraction = float(
-        np.mean(all_zero)
+        np.mean(
+            all_zero
+        )
     )
 
     finite_fraction = float(
         np.mean(
-            np.isfinite(chip)
+            np.isfinite(
+                chip
+            )
         )
     )
 
@@ -383,7 +581,6 @@ def summarize_scl_quality(
     )
 
     return {
-
         "valid_fraction": float(
             np.mean(
                 valid_mask

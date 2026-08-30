@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -9,314 +10,42 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>SatQuery AI</title>
+    <title>
+        SatQuery AI
+    </title>
 
-    <style>
-        * {
-            box-sizing: border-box;
-        }
+    <link
+        rel="stylesheet"
+        href="/static/styles.css"
+    >
 
-        body {
-            margin: 0;
-            font-family:
-                Inter,
-                Arial,
-                sans-serif;
-            background: #f4f7f8;
-            color: #172027;
-        }
-
-        header {
-            background: #0c3b2e;
-            color: white;
-            padding: 28px 8%;
-        }
-
-        header h1 {
-            margin: 0;
-            font-size: 32px;
-        }
-
-        header p {
-            margin-top: 8px;
-            margin-bottom: 0;
-            color: #d7ebe4;
-        }
-
-        main {
-            width: min(
-                1200px,
-                92%
-            );
-            margin: 35px auto 70px;
-        }
-
-        .query-panel {
-            background: white;
-            padding: 26px;
-            border-radius: 14px;
-            box-shadow:
-                0 5px 18px
-                rgba(0, 0, 0, 0.08);
-        }
-
-        .query-panel h2 {
-            margin-top: 0;
-        }
-
-        .query-row {
-            display: flex;
-            gap: 12px;
-        }
-
-        #queryInput {
-            flex: 1;
-            padding: 15px;
-            border: 1px solid #c9d2d0;
-            border-radius: 9px;
-            font-size: 16px;
-        }
-
-        #queryInput:focus {
-            outline: 2px solid #4d8b75;
-            border-color: transparent;
-        }
-
-        button {
-            border: none;
-            border-radius: 9px;
-            padding: 13px 20px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        #analyzeButton {
-            background: #147d64;
-            color: white;
-            font-size: 15px;
-        }
-
-        #analyzeButton:hover {
-            background: #106650;
-        }
-
-        #analyzeButton:disabled {
-            opacity: 0.6;
-            cursor: wait;
-        }
-
-        .examples {
-            margin-top: 16px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .example-button {
-            background: #eef5f2;
-            color: #285846;
-            padding: 8px 12px;
-            font-size: 13px;
-        }
-
-        #status {
-            margin-top: 18px;
-            min-height: 24px;
-        }
-
-        .loading {
-            color: #4c625a;
-        }
-
-        .error {
-            padding: 14px;
-            border-radius: 8px;
-            background: #fff0f0;
-            color: #a32626;
-        }
-
-        #results {
-            display: none;
-            margin-top: 30px;
-        }
-
-        .summary-card {
-            padding: 24px;
-            background: #123b31;
-            color: white;
-            border-radius: 14px;
-        }
-
-        .summary-card h2 {
-            margin-top: 0;
-        }
-
-        .summary-card p {
-            margin-bottom: 0;
-            line-height: 1.6;
-        }
-
-        .metrics {
-            display: grid;
-            grid-template-columns:
-                repeat(
-                    4,
-                    minmax(0, 1fr)
-                );
-            gap: 16px;
-            margin-top: 22px;
-        }
-
-        .metric {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow:
-                0 3px 14px
-                rgba(0, 0, 0, 0.07);
-        }
-
-        .metric-label {
-            font-size: 13px;
-            color: #6d7975;
-            margin-bottom: 9px;
-        }
-
-        .metric-value {
-            font-size: 24px;
-            font-weight: 700;
-        }
-
-        .images-grid {
-            display: grid;
-            grid-template-columns:
-                1fr 1fr;
-            gap: 20px;
-            margin-top: 25px;
-        }
-
-        .images-grid.single-image {
-            grid-template-columns: 1fr;
-        }
-
-        .image-card {
-            background: white;
-            padding: 16px;
-            border-radius: 13px;
-            box-shadow:
-                0 3px 14px
-                rgba(0, 0, 0, 0.07);
-        }
-
-        .image-card h3 {
-            margin-top: 4px;
-        }
-
-        .image-card img {
-            width: 100%;
-            border-radius: 8px;
-            display: block;
-        }
-
-        .details-grid {
-            display: grid;
-            grid-template-columns:
-                1fr 1fr;
-            gap: 20px;
-            margin-top: 25px;
-        }
-
-        .details-card {
-            background: white;
-            padding: 22px;
-            border-radius: 13px;
-            box-shadow:
-                0 3px 14px
-                rgba(0, 0, 0, 0.07);
-        }
-
-        .details-card h3 {
-            margin-top: 0;
-        }
-
-        .detail {
-            display: flex;
-            justify-content: space-between;
-            gap: 20px;
-            padding: 9px 0;
-            border-bottom: 1px solid #edf0ef;
-        }
-
-        .detail:last-child {
-            border-bottom: none;
-        }
-
-        .detail span:first-child {
-            color: #68736f;
-        }
-
-        .detail span:last-child {
-            text-align: right;
-            font-weight: 600;
-            overflow-wrap: anywhere;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        footer {
-            text-align: center;
-            padding: 30px;
-            color: #71817b;
-            font-size: 13px;
-        }
-
-        @media (
-            max-width: 850px
-        ) {
-            .metrics {
-                grid-template-columns:
-                    1fr 1fr;
-            }
-
-            .images-grid,
-            .details-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .query-row {
-                flex-direction: column;
-            }
-        }
-
-        @media (
-            max-width: 500px
-        ) {
-            .metrics {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
 </head>
+
 
 <body>
 
 <header>
-    <h1>SatQuery AI</h1>
+
+    <h1>
+        SatQuery AI
+    </h1>
 
     <p>
         Natural-language satellite analysis
         using Sentinel-2, scientific indices
         and machine learning.
     </p>
+
 </header>
+
 
 <main>
 
     <section class="query-panel">
 
-        <h2>Ask SatQuery</h2>
+        <h2>
+            Ask SatQuery
+        </h2>
 
         <div class="query-row">
 
@@ -324,7 +53,7 @@
                 id="queryInput"
                 type="text"
                 value="Analyze vegetation health for Varanasi on 2026-02-10"
-                placeholder="Ask for imagery, NDVI or vegetation analysis..."
+                placeholder="Ask for imagery, NDVI, NDWI, NDBI or change analysis..."
             >
 
             <button id="analyzeButton">
@@ -333,44 +62,53 @@
 
         </div>
 
+
         <div class="examples">
 
             <button
                 class="example-button"
                 data-query="Analyze vegetation health for Varanasi on 2026-02-10"
             >
-                Varanasi NDVI
+                Vegetation
             </button>
 
             <button
                 class="example-button"
                 data-query="Show Sentinel-2 imagery for Varanasi on 2026-02-10"
             >
-                Varanasi Imagery
+                RGB Imagery
             </button>
 
             <button
                 class="example-button"
-                data-query="Analyze vegetation health for Hyderabad on 2025-12-13"
+                data-query="Show NDWI for Varanasi on 2026-02-10"
             >
-                Hyderabad
+                NDWI / Water
             </button>
 
             <button
                 class="example-button"
-                data-query="Show NDVI for London on 2026-06-15"
+                data-query="Show NDBI for New Delhi on 2026-03-06"
             >
-                London
+                NDBI / Urban
             </button>
 
             <button
                 class="example-button"
-                data-query="Analyze vegetation health in New Delhi on 2026-03-06"
+                data-query="Compare vegetation in Varanasi between 2026-02-10 and 2026-03-10"
             >
-                New Delhi
+                Vegetation Change
+            </button>
+
+            <button
+                class="example-button"
+                data-query="Compare NDBI for New Delhi between 2025-12-01 and 2026-03-06"
+            >
+                Urban Change
             </button>
 
         </div>
+
 
         <div id="status"></div>
 
@@ -390,9 +128,11 @@
         </div>
 
 
+        <!-- NDVI -->
+
         <div
-            class="metrics"
-            id="analysisMetrics"
+            class="metrics hidden"
+            id="vegetationMetrics"
         >
 
             <div class="metric">
@@ -416,7 +156,7 @@
 
                 <div
                     class="metric-value"
-                    id="condition"
+                    id="vegetationCondition"
                 >
                     -
                 </div>
@@ -430,7 +170,7 @@
 
                 <div
                     class="metric-value"
-                    id="cloudPercent"
+                    id="vegetationCloud"
                 >
                     -
                 </div>
@@ -444,7 +184,7 @@
 
                 <div
                     class="metric-value"
-                    id="agreement"
+                    id="cnnAgreement"
                 >
                     -
                 </div>
@@ -452,6 +192,73 @@
 
         </div>
 
+
+        <!-- NDWI / NDBI -->
+
+        <div
+            class="metrics hidden"
+            id="indexMetrics"
+        >
+
+            <div class="metric">
+                <div class="metric-label">
+                    Mean Index
+                </div>
+
+                <div
+                    class="metric-value"
+                    id="indexMean"
+                >
+                    -
+                </div>
+            </div>
+
+
+            <div class="metric">
+                <div class="metric-label">
+                    Positive Pixels
+                </div>
+
+                <div
+                    class="metric-value"
+                    id="positivePixels"
+                >
+                    -
+                </div>
+            </div>
+
+
+            <div class="metric">
+                <div class="metric-label">
+                    AOI Cloud Pixels
+                </div>
+
+                <div
+                    class="metric-value"
+                    id="indexCloud"
+                >
+                    -
+                </div>
+            </div>
+
+
+            <div class="metric">
+                <div class="metric-label">
+                    Interpretation
+                </div>
+
+                <div
+                    class="metric-value small-value"
+                    id="indexInterpretation"
+                >
+                    -
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- IMAGERY -->
 
         <div
             class="metrics hidden"
@@ -465,7 +272,7 @@
 
                 <div
                     class="metric-value"
-                    id="imagerySelectedDate"
+                    id="imageryDate"
                 >
                     -
                 </div>
@@ -516,12 +323,90 @@
         </div>
 
 
+        <!-- CHANGE -->
+
+        <div
+            class="metrics hidden"
+            id="changeMetrics"
+        >
+
+            <div class="metric">
+
+                <div class="metric-label">
+                    Before Mean
+                </div>
+
+                <div
+                    class="metric-value"
+                    id="changeBeforeMean"
+                >
+                    -
+                </div>
+
+            </div>
+
+
+            <div class="metric">
+
+                <div class="metric-label">
+                    After Mean
+                </div>
+
+                <div
+                    class="metric-value"
+                    id="changeAfterMean"
+                >
+                    -
+                </div>
+
+            </div>
+
+
+            <div class="metric">
+
+                <div class="metric-label">
+                    Mean Change
+                </div>
+
+                <div
+                    class="metric-value"
+                    id="changeMean"
+                >
+                    -
+                </div>
+
+            </div>
+
+
+            <div class="metric">
+
+                <div class="metric-label">
+                    Interpretation
+                </div>
+
+                <div
+                    class="metric-value small-value"
+                    id="changeInterpretation"
+                >
+                    -
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- STANDARD IMAGES -->
+
         <div
             class="images-grid"
             id="imagesGrid"
         >
 
-            <div class="image-card">
+            <div
+                class="image-card"
+                id="rgbImageCard"
+            >
 
                 <h3>
                     Sentinel-2 RGB
@@ -537,16 +422,16 @@
 
             <div
                 class="image-card"
-                id="ndviImageCard"
+                id="analysisImageCard"
             >
 
-                <h3>
-                    Quality-Masked NDVI
+                <h3 id="analysisImageTitle">
+                    Analysis Map
                 </h3>
 
                 <img
-                    id="ndviImage"
-                    alt="Sentinel-2 NDVI map"
+                    id="analysisImage"
+                    alt="Satellite analysis map"
                 >
 
             </div>
@@ -554,9 +439,40 @@
         </div>
 
 
-        <div class="details-grid">
+        <!-- CHANGE IMAGE -->
 
-            <div class="details-card">
+        <div
+            class="images-grid single-image hidden"
+            id="changeImagesGrid"
+        >
+
+            <div class="image-card">
+
+                <h3 id="changeImageTitle">
+                    Change Map
+                </h3>
+
+                <img
+                    id="changeImage"
+                    alt="Satellite change map"
+                >
+
+            </div>
+
+        </div>
+
+
+        <!-- NORMAL DETAILS -->
+
+        <div
+            class="details-grid"
+            id="normalDetailsGrid"
+        >
+
+            <div
+                class="details-card"
+                id="locationDetails"
+            >
 
                 <h3>
                     Location & Scene
@@ -611,8 +527,8 @@
 
 
             <div
-                class="details-card"
-                id="scientificDetails"
+                class="details-card hidden"
+                id="vegetationDetails"
             >
 
                 <h3>
@@ -636,17 +552,64 @@
 
                 <div class="detail">
                     <span>CNN prediction</span>
-                    <span id="modelPrediction">-</span>
+                    <span id="cnnPrediction">-</span>
                 </div>
 
                 <div class="detail">
                     <span>Scientific / CNN difference</span>
-                    <span id="modelDifference">-</span>
+                    <span id="cnnDifference">-</span>
                 </div>
 
                 <div class="detail">
                     <span>SCL-valid pixels</span>
-                    <span id="validPixels">-</span>
+                    <span id="vegetationValidPixels">-</span>
+                </div>
+
+            </div>
+
+
+            <div
+                class="details-card hidden"
+                id="indexDetails"
+            >
+
+                <h3 id="indexDetailsTitle">
+                    Environmental Index Details
+                </h3>
+
+                <div class="detail">
+                    <span>Index</span>
+                    <span id="indexName">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>Minimum value</span>
+                    <span id="indexMin">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>Maximum value</span>
+                    <span id="indexMax">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>Standard deviation</span>
+                    <span id="indexStd">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>Positive pixels</span>
+                    <span id="indexPositive">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>SCL-valid pixels</span>
+                    <span id="indexValidPixels">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>Interpretation</span>
+                    <span id="indexDetailInterpretation">-</span>
                 </div>
 
             </div>
@@ -677,8 +640,178 @@
                 </div>
 
                 <div class="detail">
-                    <span>Request type</span>
-                    <span>Sentinel-2 RGB imagery</span>
+                    <span>Product</span>
+                    <span>Sentinel-2 RGB</span>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- CHANGE DETAILS -->
+
+        <div
+            class="details-grid hidden"
+            id="changeDetailsGrid"
+        >
+
+            <div class="details-card">
+
+                <h3>
+                    Before Observation
+                </h3>
+
+                <div class="detail">
+                    <span>Requested date</span>
+                    <span id="beforeRequestedDate">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>Selected date</span>
+                    <span id="beforeSelectedDate">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>MGRS tile</span>
+                    <span id="beforeTile">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>Scene cloud cover</span>
+                    <span id="beforeCloud">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>AOI coverage</span>
+                    <span id="beforeCoverage">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>Mean index</span>
+                    <span id="beforeMean">-</span>
+                </div>
+
+            </div>
+
+
+            <div class="details-card">
+
+                <h3>
+                    After Observation
+                </h3>
+
+                <div class="detail">
+                    <span>Requested date</span>
+                    <span id="afterRequestedDate">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>Selected date</span>
+                    <span id="afterSelectedDate">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>MGRS tile</span>
+                    <span id="afterTile">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>Scene cloud cover</span>
+                    <span id="afterCloud">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>AOI coverage</span>
+                    <span id="afterCoverage">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>Mean index</span>
+                    <span id="afterMean">-</span>
+                </div>
+
+            </div>
+
+
+            <div class="details-card">
+
+                <h3>
+                    Change Statistics
+                </h3>
+
+                <div class="detail">
+                    <span>Index</span>
+                    <span id="changeIndex">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>Mean change</span>
+                    <span id="changeDetailMean">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>Increased pixels</span>
+                    <span id="increasePercent">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>Decreased pixels</span>
+                    <span id="decreasePercent">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>Stable pixels</span>
+                    <span id="stablePercent">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>Common valid pixels</span>
+                    <span id="changeValidPixels">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>Change threshold</span>
+                    <span id="changeThreshold">-</span>
+                </div>
+
+            </div>
+
+
+            <div class="details-card">
+
+                <h3>
+                    Location & Interpretation
+                </h3>
+
+                <div class="detail">
+                    <span>Resolved location</span>
+                    <span id="changeResolvedLocation">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>Coordinates</span>
+                    <span id="changeCoordinates">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>Minimum change</span>
+                    <span id="changeMin">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>Maximum change</span>
+                    <span id="changeMax">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>Change std. deviation</span>
+                    <span id="changeStd">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>Interpretation</span>
+                    <span id="changeDetailInterpretation">-</span>
                 </div>
 
             </div>
@@ -691,586 +824,21 @@
 
 
 <footer>
-    <b>SatQuery AI</b> — Sentinel-2 remote-sensing
-    analysis made by <b>Shreyansh</b>
+
+    <b>
+        SatQuery AI
+    </b>
+
+    — Sentinel-2 remote-sensing analysis made by
+
+    <b>
+        Shreyansh
+    </b>
+
 </footer>
 
 
-<script>
-
-    const queryInput =
-        document.getElementById(
-            "queryInput"
-        );
-
-    const analyzeButton =
-        document.getElementById(
-            "analyzeButton"
-        );
-
-    const statusBox =
-        document.getElementById(
-            "status"
-        );
-
-    const results =
-        document.getElementById(
-            "results"
-        );
-
-    const analysisMetrics =
-        document.getElementById(
-            "analysisMetrics"
-        );
-
-    const imageryMetrics =
-        document.getElementById(
-            "imageryMetrics"
-        );
-
-    const scientificDetails =
-        document.getElementById(
-            "scientificDetails"
-        );
-
-    const imageryDetails =
-        document.getElementById(
-            "imageryDetails"
-        );
-
-    const ndviImageCard =
-        document.getElementById(
-            "ndviImageCard"
-        );
-
-    const imagesGrid =
-        document.getElementById(
-            "imagesGrid"
-        );
-
-
-    function imageUrl(path) {
-
-        return (
-            "/result-image?path="
-            + encodeURIComponent(path)
-        );
-
-    }
-
-
-    function setText(
-        id,
-        value
-    ) {
-
-        document.getElementById(
-            id
-        ).textContent = value;
-
-    }
-
-
-    function formatPercent(
-        value
-    ) {
-
-        if (
-            value === null
-            || value === undefined
-        ) {
-            return "-";
-        }
-
-        return (
-            Number(value).toFixed(2)
-            + "%"
-        );
-
-    }
-
-
-    function formatDateDifference(
-        value
-    ) {
-
-        if (
-            value === null
-            || value === undefined
-        ) {
-            return "-";
-        }
-
-        return (
-            value
-            + (
-                value === 1
-                ? " day"
-                : " days"
-            )
-        );
-
-    }
-
-
-    function fillCommonDetails(
-        data
-    ) {
-
-        setText(
-            "resolvedLocation",
-            data.location.resolved
-        );
-
-        setText(
-            "coordinates",
-            data.location.latitude.toFixed(6)
-            + ", "
-            + data.location.longitude.toFixed(6)
-        );
-
-        setText(
-            "requestedDate",
-            data.date.requested || "-"
-        );
-
-        setText(
-            "selectedDate",
-            data.date.selected || "-"
-        );
-
-        setText(
-            "dateDifference",
-            formatDateDifference(
-                data.date.difference_days
-            )
-        );
-
-        setText(
-            "tile",
-            data.scene.tile || "-"
-        );
-
-        setText(
-            "coverage",
-            formatPercent(
-                data.scene
-                    .aoi_coverage_percent
-            )
-        );
-
-        setText(
-            "candidateCount",
-            data.scene.candidate_count
-        );
-
-        setText(
-            "rejectedCount",
-            data.scene.rejected_count
-        );
-
-    }
-
-
-    function showAnalysisResult(
-        data
-    ) {
-
-        analysisMetrics.classList.remove(
-            "hidden"
-        );
-
-        imageryMetrics.classList.add(
-            "hidden"
-        );
-
-        scientificDetails.classList.remove(
-            "hidden"
-        );
-
-        imageryDetails.classList.add(
-            "hidden"
-        );
-
-        ndviImageCard.classList.remove(
-            "hidden"
-        );
-
-        imagesGrid.classList.remove(
-            "single-image"
-        );
-
-        setText(
-            "resultTitle",
-            "Vegetation Analysis: "
-            + data.location.requested
-        );
-
-        setText(
-            "meanNdvi",
-            data.vegetation.mean_ndvi
-                .toFixed(4)
-        );
-
-        setText(
-            "condition",
-            data.vegetation.condition
-        );
-
-        setText(
-            "cloudPercent",
-            formatPercent(
-                data.quality.cloud_percent
-            )
-        );
-
-        setText(
-            "agreement",
-            data.model.agreement
-                .toUpperCase()
-        );
-
-        setText(
-            "minNdvi",
-            data.vegetation.min_ndvi
-                .toFixed(4)
-        );
-
-        setText(
-            "maxNdvi",
-            data.vegetation.max_ndvi
-                .toFixed(4)
-        );
-
-        setText(
-            "stdNdvi",
-            data.vegetation.std_ndvi
-                .toFixed(4)
-        );
-
-        setText(
-            "modelPrediction",
-            data.model
-                .predicted_mean_ndvi
-                .toFixed(4)
-        );
-
-        setText(
-            "modelDifference",
-            data.model
-                .absolute_difference
-                .toFixed(4)
-        );
-
-        setText(
-            "validPixels",
-            formatPercent(
-                data.quality
-                    .scl_valid_percent
-            )
-        );
-
-        document.getElementById(
-            "rgbImage"
-        ).src = imageUrl(
-            data.outputs.rgb_preview
-        );
-
-        document.getElementById(
-            "ndviImage"
-        ).src = imageUrl(
-            data.outputs.ndvi_preview
-        );
-
-    }
-
-
-    function showImageryResult(
-        data
-    ) {
-
-        analysisMetrics.classList.add(
-            "hidden"
-        );
-
-        imageryMetrics.classList.remove(
-            "hidden"
-        );
-
-        scientificDetails.classList.add(
-            "hidden"
-        );
-
-        imageryDetails.classList.remove(
-            "hidden"
-        );
-
-        ndviImageCard.classList.add(
-            "hidden"
-        );
-
-        imagesGrid.classList.add(
-            "single-image"
-        );
-
-        setText(
-            "resultTitle",
-            "Sentinel-2 Imagery: "
-            + data.location.requested
-        );
-
-        setText(
-            "imagerySelectedDate",
-            data.date.selected || "-"
-        );
-
-        setText(
-            "imageryCloud",
-            formatPercent(
-                data.scene
-                    .cloud_cover_percent
-            )
-        );
-
-        setText(
-            "imageryCoverage",
-            formatPercent(
-                data.scene
-                    .aoi_coverage_percent
-            )
-        );
-
-        setText(
-            "imageryResolution",
-            data.resolution.display
-            + " × "
-            + data.resolution.display
-        );
-
-        setText(
-            "imagerySceneId",
-            data.scene.id
-        );
-
-        setText(
-            "imagerySceneCloud",
-            formatPercent(
-                data.scene
-                    .cloud_cover_percent
-            )
-        );
-
-        setText(
-            "displayResolution",
-            data.resolution.display
-            + " × "
-            + data.resolution.display
-            + " px"
-        );
-
-        document.getElementById(
-            "rgbImage"
-        ).src = imageUrl(
-            data.outputs.rgb_preview
-        );
-
-        document.getElementById(
-            "ndviImage"
-        ).removeAttribute(
-            "src"
-        );
-
-    }
-
-
-    function showResult(
-        data
-    ) {
-
-        results.style.display =
-            "block";
-
-        setText(
-            "resultMessage",
-            data.message
-        );
-
-        fillCommonDetails(
-            data
-        );
-
-        if (
-            data.analysis_type
-            === "imagery"
-        ) {
-
-            showImageryResult(
-                data
-            );
-
-        }
-
-        else {
-
-            showAnalysisResult(
-                data
-            );
-
-        }
-
-        results.scrollIntoView(
-            {
-                behavior: "smooth",
-                block: "start"
-            }
-        );
-
-    }
-
-
-    async function analyze() {
-
-        const query =
-            queryInput.value.trim();
-
-        if (!query) {
-
-            statusBox.innerHTML =
-                '<div class="error">'
-                + 'Please enter a query.'
-                + '</div>';
-
-            return;
-
-        }
-
-        analyzeButton.disabled = true;
-
-        analyzeButton.textContent =
-            "Analyzing...";
-
-        results.style.display =
-            "none";
-
-        statusBox.innerHTML =
-            '<div class="loading">'
-            + 'Searching Sentinel-2 '
-            + 'imagery and processing '
-            + 'your request...'
-            + '</div>';
-
-        try {
-
-            const response =
-                await fetch(
-                    "/analyze",
-                    {
-                        method: "POST",
-
-                        headers: {
-                            "Content-Type":
-                                "application/json"
-                        },
-
-                        body: JSON.stringify(
-                            {
-                                query: query
-                            }
-                        )
-                    }
-                );
-
-            const data =
-                await response.json();
-
-            if (!response.ok) {
-
-                const message =
-                    data.detail?.message
-                    || "Analysis failed.";
-
-                throw new Error(
-                    message
-                );
-
-            }
-
-            statusBox.innerHTML =
-                "";
-
-            showResult(
-                data
-            );
-
-        }
-
-        catch (error) {
-
-            results.style.display =
-                "none";
-
-            statusBox.innerHTML =
-                '<div class="error">'
-                + error.message
-                + '</div>';
-
-        }
-
-        finally {
-
-            analyzeButton.disabled =
-                false;
-
-            analyzeButton.textContent =
-                "Analyze";
-
-        }
-
-    }
-
-
-    analyzeButton.addEventListener(
-        "click",
-        analyze
-    );
-
-
-    queryInput.addEventListener(
-        "keydown",
-        function(event) {
-
-            if (
-                event.key
-                === "Enter"
-            ) {
-
-                analyze();
-
-            }
-
-        }
-    );
-
-
-    document.querySelectorAll(
-        ".example-button"
-    ).forEach(
-        button => {
-
-            button.addEventListener(
-                "click",
-                function() {
-
-                    queryInput.value =
-                        button.dataset.query;
-
-                }
-            );
-
-        }
-    );
-
-</script>
+<script src="/static/app.js"></script>
 
 </body>
 

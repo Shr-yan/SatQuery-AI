@@ -4,11 +4,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from live_chip import (
+    calculate_chip_ndbi,
     calculate_chip_ndvi,
+    calculate_chip_ndwi,
 )
 
 
-def stretch_rgb(rgb):
+def stretch_rgb(
+    rgb,
+):
 
     output = np.zeros_like(
         rgb,
@@ -122,20 +126,17 @@ def create_rgb_preview(
     )
 
 
-def create_ndvi_preview(
-    chip,
+def create_index_preview(
+    index,
     output_path,
-    valid_mask=None,
+    title,
+    label,
+    cmap,
 ):
 
-    ndvi = calculate_chip_ndvi(
-        chip,
-        valid_mask=valid_mask,
-    )
-
-    masked_ndvi = (
+    masked_index = (
         np.ma.masked_invalid(
-            ndvi
+            index
         )
     )
 
@@ -153,15 +154,14 @@ def create_ndvi_preview(
     )
 
     image = plt.imshow(
-        masked_ndvi,
-        cmap="RdYlGn",
+        masked_index,
+        cmap=cmap,
         vmin=-1,
         vmax=1,
     )
 
     plt.title(
-        "Sentinel-2 NDVI "
-        "(SCL Quality Masked)"
+        title
     )
 
     plt.axis(
@@ -175,7 +175,7 @@ def create_ndvi_preview(
     )
 
     colorbar.set_label(
-        "NDVI"
+        label
     )
 
     plt.tight_layout()
@@ -190,4 +190,75 @@ def create_ndvi_preview(
 
     return str(
         output_path
+    )
+
+
+def create_ndvi_preview(
+    chip,
+    output_path,
+    valid_mask=None,
+):
+
+    ndvi = calculate_chip_ndvi(
+        chip,
+        valid_mask=valid_mask,
+    )
+
+    return create_index_preview(
+        index=ndvi,
+        output_path=output_path,
+        title=(
+            "Sentinel-2 NDVI "
+            "(SCL Quality Masked)"
+        ),
+        label="NDVI",
+        cmap="RdYlGn",
+    )
+
+
+def create_ndwi_preview(
+    chip,
+    output_path,
+    valid_mask=None,
+):
+
+    ndwi = calculate_chip_ndwi(
+        chip,
+        valid_mask=valid_mask,
+    )
+
+    return create_index_preview(
+        index=ndwi,
+        output_path=output_path,
+        title=(
+            "Sentinel-2 NDWI "
+            "(SCL Quality Masked)"
+        ),
+        label="NDWI",
+        cmap="BrBG",
+    )
+
+
+def create_ndbi_preview(
+    chip,
+    swir,
+    output_path,
+    valid_mask=None,
+):
+
+    ndbi = calculate_chip_ndbi(
+        chip,
+        swir,
+        valid_mask=valid_mask,
+    )
+
+    return create_index_preview(
+        index=ndbi,
+        output_path=output_path,
+        title=(
+            "Sentinel-2 NDBI "
+            "(SCL Quality Masked)"
+        ),
+        label="NDBI",
+        cmap="RdBu_r",
     )
