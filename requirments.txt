@@ -13,3 +13,4 @@ uvicorn
 pydantic
 groq
 python-dotenv
+geopy
