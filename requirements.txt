@@ -1,0 +1,16 @@
+numpy
+rasterio
+pyproj
+shapely
+Pillow
+matplotlib
+requests
+pystac-client
+planetary-computer
+torch
+fastapi
+uvicorn
+pydantic
+groq
+python-dotenv
+geopy
