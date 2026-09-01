@@ -133,6 +133,74 @@ const clearChatButton =
     );
 
 
+const themeToggle =
+    document.getElementById(
+        "themeToggle"
+    );
+
+const themeIcon =
+    document.getElementById(
+        "themeIcon"
+    );
+
+const themeLabel =
+    document.getElementById(
+        "themeLabel"
+    );
+
+
+let lightModeEnabled =
+    false;
+
+
+function applyTheme(
+    useLightMode
+) {
+
+    lightModeEnabled =
+        useLightMode;
+
+    document.body.classList.toggle(
+        "light-mode",
+        useLightMode
+    );
+
+    themeToggle.setAttribute(
+        "aria-pressed",
+        useLightMode
+            ? "true"
+            : "false"
+    );
+
+    themeToggle.setAttribute(
+        "aria-label",
+        useLightMode
+            ? "Switch to dark mode"
+            : "Switch to light mode"
+    );
+
+    themeIcon.textContent =
+        useLightMode
+            ? "🌙"
+            : "☀️";
+
+    themeLabel.textContent =
+        useLightMode
+            ? "Dark mode"
+            : "Light mode";
+
+}
+
+
+/*
+The site intentionally starts in dark mode on every page load.
+The toggle changes only the current page session.
+*/
+applyTheme(
+    false
+);
+
+
 let currentAnalysisResult =
     null;
 
@@ -2007,6 +2075,18 @@ async function analyze() {
     }
 
 }
+
+
+themeToggle.addEventListener(
+    "click",
+    function () {
+
+        applyTheme(
+            !lightModeEnabled
+        );
+
+    }
+);
 
 
 analyzeButton.addEventListener(
