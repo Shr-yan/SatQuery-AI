@@ -2371,7 +2371,11 @@ body.light-mode .report-status {
 }
 
 body.light-mode .header-link-button {
-    background: rgba(237, 195, 99, 0.24);
+    background: linear-gradient(
+            135deg,
+            #EDC363 0%,
+            #A2A915 100%
+        );
     border-color: rgba(63, 57, 41, 0.18);
     color: #3F3929;
 }
