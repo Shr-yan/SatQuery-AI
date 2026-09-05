@@ -1,0 +1,56 @@
+{
+  "dataset_role": "real cross-modal SatQuery demo pair",
+  "real_satellite_data": true,
+  "synthetic": false,
+  "location": "Varanasi, India",
+  "bbox_wgs84": [
+    82.95402478675632,
+    25.29963377650018,
+    82.99377521324368,
+    25.335566223499818
+  ],
+  "optical": {
+    "sensor": "Sentinel-2 L2A",
+    "collection": "sentinel-2-l2a",
+    "scene_id": "S2C_MSIL2A_20260223T045811_R119_T44RPP_20260223T101909",
+    "acquisition_datetime": "2026-02-23T04:58:11.025000+00:00",
+    "scene_cloud_cover_percent": 0.00156,
+    "bands": [
+      "B04",
+      "B03",
+      "B02"
+    ],
+    "file": "varanasi_real_sentinel2_optical.tif",
+    "valid_aoi_fraction": 1.0
+  },
+  "sar": {
+    "sensor": "Sentinel-1 RTC",
+    "collection": "sentinel-1-rtc",
+    "scene_id": "S1A_IW_GRDH_1SDV_20260223T002820_20260223T002845_063339_07F469_rtc",
+    "acquisition_datetime": "2026-02-23T00:28:33.158535+00:00",
+    "polarization": "VV",
+    "pixel_content": "linear intensity",
+    "file": "varanasi_real_sentinel1_vv.tif",
+    "valid_aoi_fraction": 1.0
+  },
+  "temporal_gap_days": 0.18724382482638888,
+  "co_registration": {
+    "exact_output_grid_match": true,
+    "crs": "EPSG:32644",
+    "width": 407,
+    "height": 404,
+    "pixel_size": [
+      10.0,
+      10.0
+    ]
+  },
+  "interpretation_note": "The pair is spatially co-registered by resampling Sentinel-1 RTC onto the Sentinel-2 analysis grid. Acquisition times can differ, so treat cross-modal evidence as near-date complementary observations rather than perfectly simultaneous measurements.",
+  "center": {
+    "latitude": 25.3176,
+    "longitude": 82.9739
+  },
+  "requested_date_range": {
+    "start": "2026-01-15",
+    "end": "2026-04-15"
+  }
+}

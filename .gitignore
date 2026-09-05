@@ -1,37 +1,66 @@
-# Python
-__pycache__/
-*.pyc
+# SatQuery AI — repository hygiene
+
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Python environments / caches
 .venv/
 venv/
+env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 
-.env
+# Notebook / editor / OS noise
+.ipynb_checkpoints/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
 
-# Large satellite/raw data
-data/raw/**/*.tif
-data/raw/**/*.jp2
-data/raw/**/*.npy
+# Runtime-only user uploads and generated reports/results
+data/processed/uploads/
+data/processed/reports/
+data/processed/results/
 
-# Processed datasets
-data/processed/**/*.tif
-data/processed/**/*.npy
+# Runtime evaluation log and disposable local proxy runs
+data/processed/evaluation/execution_log.jsonl
+data/processed/evaluation/benchmark_runs/
 
-
-# Extra model checkpoints
+# Large local training/intermediate data — never needed by Replit runtime
+data/raw/
+data/tiles/
+data/processed/chips/
+data/processed/labels/
+data/processed/train/
+data/processed/train_labels/
+data/processed/val/
+data/processed/val_labels/
+data/processed/test/
+data/processed/test_labels/
+data/processed/ml/
+data/processed/*.npy
 data/processed/satellite_cnn.pth
 data/processed/satquery_multiscene_best.pth
 
-# Generated previews/results
-data/processed/results/
-data/processed/train/
-data/processed/val/
-data/processed/train_labels/
-data/processed/val_labels/
-data/processed/chips/
-data/processed/labels/
-data/processed/ml/
+# Real demo rasters are reproducible from the downloader; keep only provenance JSON
+data/demo/real_optical_sar/*.tif
+data/demo/real_optical_sar/*.tiff
 
-# Generated tiles
-data/tiles/
+# Download/cache scratch areas
+.cache/
+hf_cache/
+wandb/
 
-# Keep the directory structure
-!data/.gitkeep
+# Keep these intentionally versionable:
+# data/processed/models/satquery_eurosat_specialist.pt
+# data/processed/models/satquery_eurosat_metrics.json
+# data/processed/evaluation/public_benchmark_runs/*.json
+# data/evaluation/sih_demo_cases.json
+# data/demo/real_optical_sar/real_optical_sar_manifest.json

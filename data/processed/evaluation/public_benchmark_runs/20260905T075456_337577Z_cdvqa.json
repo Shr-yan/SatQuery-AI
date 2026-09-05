@@ -1,0 +1,392 @@
+{
+  "benchmark": "CDVQA",
+  "subset_name": "Public CDVQA 10-case temporal diagnostic subset",
+  "sample_count": 10,
+  "model": "qwen/qwen3.6-27b",
+  "metrics": {
+    "exact_match_percent": 50.0,
+    "token_f1_percent": 50.0
+  },
+  "records": [
+    {
+      "case_id": "0",
+      "task": "change_vqa",
+      "category": "other change question",
+      "question": "This is a pair of satellite images capturing the same location at different times: Did the areas of non-vegetated ground surface change? Answer with yes or no.",
+      "reference_answer": "yes",
+      "model_answer": "yes",
+      "before_specialist": [
+        {
+          "label": "Residential",
+          "score_percent": 45.7
+        },
+        {
+          "label": "Industrial",
+          "score_percent": 27.23
+        },
+        {
+          "label": "Pasture",
+          "score_percent": 8.63
+        }
+      ],
+      "after_specialist": [
+        {
+          "label": "Industrial",
+          "score_percent": 71.26
+        },
+        {
+          "label": "PermanentCrop",
+          "score_percent": 17.76
+        },
+        {
+          "label": "Forest",
+          "score_percent": 2.09
+        }
+      ]
+    },
+    {
+      "case_id": "1",
+      "task": "change_vqa",
+      "category": "before-state question",
+      "question": "This is a pair of satellite images capturing the same location at different times: Did the regions of non-vegetated ground surface change in the pre-event image? Answer with yes or no.",
+      "reference_answer": "yes",
+      "model_answer": "no",
+      "before_specialist": [
+        {
+          "label": "Residential",
+          "score_percent": 45.7
+        },
+        {
+          "label": "Industrial",
+          "score_percent": 27.23
+        },
+        {
+          "label": "Pasture",
+          "score_percent": 8.63
+        }
+      ],
+      "after_specialist": [
+        {
+          "label": "Industrial",
+          "score_percent": 71.26
+        },
+        {
+          "label": "PermanentCrop",
+          "score_percent": 17.76
+        },
+        {
+          "label": "Forest",
+          "score_percent": 2.09
+        }
+      ]
+    },
+    {
+      "case_id": "2",
+      "task": "change_vqa",
+      "category": "after-state question",
+      "question": "This is a pair of satellite images capturing the same location at different times: Have the areas of non-vegetated ground surface changed in the second image? Answer with yes or no.",
+      "reference_answer": "yes",
+      "model_answer": "yes",
+      "before_specialist": [
+        {
+          "label": "Residential",
+          "score_percent": 45.7
+        },
+        {
+          "label": "Industrial",
+          "score_percent": 27.23
+        },
+        {
+          "label": "Pasture",
+          "score_percent": 8.63
+        }
+      ],
+      "after_specialist": [
+        {
+          "label": "Industrial",
+          "score_percent": 71.26
+        },
+        {
+          "label": "PermanentCrop",
+          "score_percent": 17.76
+        },
+        {
+          "label": "Forest",
+          "score_percent": 2.09
+        }
+      ]
+    },
+    {
+      "case_id": "3",
+      "task": "change_vqa",
+      "category": "increase or decrease",
+      "question": "This is a pair of satellite images capturing the same location at different times: Did the areas of low vegetation increase? Answer with yes or no.",
+      "reference_answer": "no",
+      "model_answer": "no",
+      "before_specialist": [
+        {
+          "label": "Residential",
+          "score_percent": 45.7
+        },
+        {
+          "label": "Industrial",
+          "score_percent": 27.23
+        },
+        {
+          "label": "Pasture",
+          "score_percent": 8.63
+        }
+      ],
+      "after_specialist": [
+        {
+          "label": "Industrial",
+          "score_percent": 71.26
+        },
+        {
+          "label": "PermanentCrop",
+          "score_percent": 17.76
+        },
+        {
+          "label": "Forest",
+          "score_percent": 2.09
+        }
+      ]
+    },
+    {
+      "case_id": "5",
+      "task": "change_vqa",
+      "category": "smallest change",
+      "question": "This is a pair of satellite images capturing the same location at different times: What type of change is the smallest? Choose from one of the following options: buildings, low_vegetation, nonvegetated ground surface, playgrounds, trees, water.",
+      "reference_answer": "nonvegetated ground surface",
+      "model_answer": "buildings",
+      "before_specialist": [
+        {
+          "label": "Residential",
+          "score_percent": 45.7
+        },
+        {
+          "label": "Industrial",
+          "score_percent": 27.23
+        },
+        {
+          "label": "Pasture",
+          "score_percent": 8.63
+        }
+      ],
+      "after_specialist": [
+        {
+          "label": "Industrial",
+          "score_percent": 71.26
+        },
+        {
+          "label": "PermanentCrop",
+          "score_percent": 17.76
+        },
+        {
+          "label": "Forest",
+          "score_percent": 2.09
+        }
+      ]
+    },
+    {
+      "case_id": "6",
+      "task": "change_vqa",
+      "category": "largest change",
+      "question": "This is a pair of satellite images capturing the same location at different times: What is the largest change? Choose from one of the following options: buildings, low_vegetation, nonvegetated ground surface, playgrounds, trees, water.",
+      "reference_answer": "nonvegetated ground surface",
+      "model_answer": "trees",
+      "before_specialist": [
+        {
+          "label": "Residential",
+          "score_percent": 45.7
+        },
+        {
+          "label": "Industrial",
+          "score_percent": 27.23
+        },
+        {
+          "label": "Pasture",
+          "score_percent": 8.63
+        }
+      ],
+      "after_specialist": [
+        {
+          "label": "Industrial",
+          "score_percent": 71.26
+        },
+        {
+          "label": "PermanentCrop",
+          "score_percent": 17.76
+        },
+        {
+          "label": "Forest",
+          "score_percent": 2.09
+        }
+      ]
+    },
+    {
+      "case_id": "11",
+      "task": "change_vqa",
+      "category": "semantic transition",
+      "question": "This is a pair of satellite images capturing the same location at different times: What have the regions of non-vegetated ground surface in the pre-change image mainly changed to? Choose from one of the following options: buildings, low_vegetation, nonvegetated ground surface, playgrounds, trees, water.",
+      "reference_answer": "buildings",
+      "model_answer": "trees",
+      "before_specialist": [
+        {
+          "label": "Residential",
+          "score_percent": 45.7
+        },
+        {
+          "label": "Industrial",
+          "score_percent": 27.23
+        },
+        {
+          "label": "Pasture",
+          "score_percent": 8.63
+        }
+      ],
+      "after_specialist": [
+        {
+          "label": "Industrial",
+          "score_percent": 71.26
+        },
+        {
+          "label": "PermanentCrop",
+          "score_percent": 17.76
+        },
+        {
+          "label": "Forest",
+          "score_percent": 2.09
+        }
+      ]
+    },
+    {
+      "case_id": "12",
+      "task": "change_vqa",
+      "category": "change ratio",
+      "question": "This is a pair of satellite images capturing the same location at different times: What is the percentage of changed regions? Choose from one of the following options: 0, 0_to_10, 10_to_20, 20_to_30, 30_to_40, 40_to_50, 50_to_60, 60_to_70, 70_to_80, 80_to_90, 90_to_100.",
+      "reference_answer": "0_to_10",
+      "model_answer": "0_to_10",
+      "before_specialist": [
+        {
+          "label": "Residential",
+          "score_percent": 45.7
+        },
+        {
+          "label": "Industrial",
+          "score_percent": 27.23
+        },
+        {
+          "label": "Pasture",
+          "score_percent": 8.63
+        }
+      ],
+      "after_specialist": [
+        {
+          "label": "Industrial",
+          "score_percent": 71.26
+        },
+        {
+          "label": "PermanentCrop",
+          "score_percent": 17.76
+        },
+        {
+          "label": "Forest",
+          "score_percent": 2.09
+        }
+      ]
+    },
+    {
+      "case_id": "1",
+      "task": "change_vqa",
+      "category": "other change question",
+      "question": "This is a pair of satellite images capturing the same location at different times: Did the regions of trees change? Answer with yes or no.",
+      "reference_answer": "no",
+      "model_answer": "no",
+      "before_specialist": [
+        {
+          "label": "Residential",
+          "score_percent": 45.7
+        },
+        {
+          "label": "Industrial",
+          "score_percent": 27.23
+        },
+        {
+          "label": "Pasture",
+          "score_percent": 8.63
+        }
+      ],
+      "after_specialist": [
+        {
+          "label": "Industrial",
+          "score_percent": 71.26
+        },
+        {
+          "label": "PermanentCrop",
+          "score_percent": 17.76
+        },
+        {
+          "label": "Forest",
+          "score_percent": 2.09
+        }
+      ]
+    },
+    {
+      "case_id": "2",
+      "task": "change_vqa",
+      "category": "other change question",
+      "question": "This is a pair of satellite images capturing the same location at different times: Have the areas of low vegetation changed? Answer with yes or no.",
+      "reference_answer": "no",
+      "model_answer": "yes",
+      "before_specialist": [
+        {
+          "label": "Residential",
+          "score_percent": 45.7
+        },
+        {
+          "label": "Industrial",
+          "score_percent": 27.23
+        },
+        {
+          "label": "Pasture",
+          "score_percent": 8.63
+        }
+      ],
+      "after_specialist": [
+        {
+          "label": "Industrial",
+          "score_percent": 71.26
+        },
+        {
+          "label": "PermanentCrop",
+          "score_percent": 17.76
+        },
+        {
+          "label": "Forest",
+          "score_percent": 2.09
+        }
+      ]
+    }
+  ],
+  "categories": [
+    "after-state question",
+    "before-state question",
+    "change ratio",
+    "increase or decrease",
+    "largest change",
+    "other change question",
+    "semantic transition",
+    "smallest change"
+  ],
+  "satquery_rs_specialist_used": true,
+  "satquery_rs_specialist_model": "SatQuery EuroSAT Scene Specialist v1",
+  "temporal_visual_evidence": "before + after + absolute visual difference panel",
+  "source": {
+    "dataset": "CDVQA",
+    "image_source": "SECOND public image pairs",
+    "distribution_source": "jirvin16/TEOChatlas external CDVQA evaluation conversion"
+  },
+  "evaluation_note": "This is a small public CDVQA temporal diagnostic using SatQuery's normalized Exact Match and token-F1 metrics. It is not an official full CDVQA leaderboard score.",
+  "imported_at": "2026-09-05T07:54:56.337577+00:00"
+}

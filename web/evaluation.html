@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SatQuery AI — Evaluation Center</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="evaluation-page">
+<header>
+    <div class="header-content">
+        <div class="header-copy">
+            <h1>SatQuery AI — Evaluation Center</h1>
+            <p>Implementation readiness, runtime audit, model evidence and benchmark diagnostics.</p>
+        </div>
+        <div class="header-actions">
+            <a id="backToSatQueryLink" class="header-link-button" href="/app">← Back to SatQuery</a>
+            <button
+                id="evaluationThemeToggle"
+                class="theme-toggle"
+                type="button"
+                aria-label="Switch to light mode"
+                aria-pressed="false"
+            >
+                <span id="evaluationThemeIcon" aria-hidden="true">☀️</span>
+                <span id="evaluationThemeLabel">Light mode</span>
+            </button>
+        </div>
+    </div>
+</header>
+
+<main class="evaluation-main">
+    <section class="evaluation-hero-card">
+        <div>
+            <span class="phase-badge">SIH evaluation readiness</span>
+            <h2>Evidence, not just claims</h2>
+            <p>
+                This page separates implementation readiness from benchmark performance.
+                A feature marked implemented means the workflow exists and is auditable;
+                it does not mean an official public-benchmark score has already been achieved.
+            </p>
+        </div>
+        <button id="refreshEvaluationButton" type="button">Refresh</button>
+    </section>
+
+    <div id="evaluationStatus" class="evaluation-status">Loading evaluation data…</div>
+
+    <section class="evaluation-metric-grid">
+        <article class="metric evaluation-metric-card">
+            <div class="metric-label">Implementation items</div>
+            <div class="metric-value" id="readinessCount">-</div>
+        </article>
+        <article class="metric evaluation-metric-card">
+            <div class="metric-label">Runtime events</div>
+            <div class="metric-value" id="runtimeEventCount">-</div>
+        </article>
+        <article class="metric evaluation-metric-card">
+            <div class="metric-label">Successful events</div>
+            <div class="metric-value" id="runtimeSuccessCount">-</div>
+        </article>
+        <article class="metric evaluation-metric-card">
+            <div class="metric-label">EuroSAT held-out accuracy</div>
+            <div class="metric-value" id="specialistAccuracy">-</div>
+        </article>
+    </section>
+
+    <section class="evaluation-section-card">
+        <h2>Mandatory Capability Readiness</h2>
+        <div id="readinessList" class="readiness-list"></div>
+    </section>
+
+    <section class="evaluation-two-column">
+        <article class="evaluation-section-card">
+            <h2>Runtime Audit</h2>
+            <div id="runtimeSummary"></div>
+        </article>
+        <article class="evaluation-section-card">
+            <h2>Remote-Sensing Specialist</h2>
+            <div id="specialistSummary"></div>
+        </article>
+    </section>
+
+    <section class="evaluation-section-card">
+        <h2>SIH Demo Cases</h2>
+        <p class="evaluation-note">
+            These are demonstration cases for exercising the implemented workflows. They are not benchmark samples.
+        </p>
+        <div id="demoCases" class="demo-case-grid"></div>
+    </section>
+
+    <section class="evaluation-section-card public-benchmark-card">
+        <div class="evaluation-section-heading-row">
+            <div>
+                <span class="phase-badge">Public benchmark subset</span>
+                <h2>Public Benchmark Diagnostics</h2>
+            </div>
+        </div>
+        <p class="evaluation-note">
+            Import diagnostic results produced by the supplied VRSBench or CDVQA Kaggle runners.
+            SatQuery keeps each public benchmark visible separately and reports normalized Exact Match and token F1 as
+            transparent local diagnostics rather than claiming an official full-benchmark leaderboard score.
+        </p>
+
+        <div class="public-benchmark-import-row">
+            <input
+                id="publicBenchmarkFileInput"
+                class="benchmark-file-input"
+                type="file"
+                accept=".json,application/json"
+                placeholder="import file"
+            >
+            <button id="importPublicBenchmarkButton" type="button">Import Public Benchmark Result</button>
+            <span id="publicBenchmarkImportStatus"></span>
+        </div>
+
+        <div id="publicBenchmarkSummary" class="public-benchmark-summary"></div>
+    </section>
+
+    <section class="evaluation-section-card">
+        <h2>Local Benchmark Proxy Evaluator</h2>
+        <p class="evaluation-note">
+            Paste reference/prediction pairs to calculate normalized exact match and token F1.
+            This makes no Groq call and is deliberately labelled a local proxy, not an official VRSBench/CDVQA score.
+        </p>
+
+        <textarea id="benchmarkInput" class="benchmark-textarea" spellcheck="false" placeholder="benchmark">[
+  {
+    "case_id": "example_1",
+    "task": "vqa",
+    "question": "Is a river visible?",
+    "reference_answer": "yes",
+    "model_answer": "Yes."
+  },
+  {
+    "case_id": "example_2",
+    "task": "change_vqa",
+    "question": "Did the built-up area increase?",
+    "reference_answer": "increased",
+    "model_answer": "The built-up area increased."
+  }
+]</textarea>
+
+        <div class="evaluation-action-row">
+            <button id="runBenchmarkButton" type="button">Run Proxy Evaluation</button>
+            <span id="benchmarkStatus"></span>
+        </div>
+
+        <div id="benchmarkResult" class="benchmark-result hidden"></div>
+    </section>
+
+    <section class="evaluation-section-card">
+        <h2>Latest Saved Proxy Run</h2>
+        <div id="latestBenchmarkRun"></div>
+    </section>
+</main>
+
+<footer>
+    <b>SatQuery AI</b> — Evaluation evidence and benchmark-readiness workspace
+</footer>
+
+<script src="/static/evaluation.js"></script>
+</body>
+</html>

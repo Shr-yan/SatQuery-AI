@@ -1,0 +1,44 @@
+[
+  {
+    "id": "demo_search_ndvi",
+    "workflow": "Search Earth",
+    "capability": "Scientific vegetation analysis",
+    "prompt": "Analyze vegetation in Varanasi on 2026-02-10",
+    "expected_evidence": "Sentinel-2 scene, NDVI statistics, RGB/NDVI map, scientific-tool execution trace"
+  },
+  {
+    "id": "demo_search_change",
+    "workflow": "Search Earth",
+    "capability": "Multi-temporal scientific change analysis",
+    "prompt": "Analyze vegetation change in Varanasi between 2026-02-10 and 2026-03-10",
+    "expected_evidence": "Before/after observations, change statistics, change map, grounded explanation"
+  },
+  {
+    "id": "demo_single_caption",
+    "workflow": "Analyze My Imagery / Single Image",
+    "capability": "Remote-sensing captioning",
+    "prompt": "Describe this remote-sensing scene and its major visible spatial patterns.",
+    "expected_evidence": "Image validation, EuroSAT specialist top-k evidence, VLM scene description, execution trace"
+  },
+  {
+    "id": "demo_single_vqa",
+    "workflow": "Analyze My Imagery / Single Image",
+    "capability": "Single-image VQA",
+    "prompt": "Is there a water-like area visible, and where is it located relative to the image?",
+    "expected_evidence": "Visual answer grounded in the uploaded image and metadata"
+  },
+  {
+    "id": "demo_bitemporal",
+    "workflow": "Analyze My Imagery / Before + After Pair",
+    "capability": "Change VQA",
+    "prompt": "What changed between the two images, and where is the change concentrated?",
+    "expected_evidence": "Pair compatibility, visual difference map, change statistics, change-focused VQA"
+  },
+  {
+    "id": "demo_optical_sar",
+    "workflow": "Analyze My Imagery / Optical + SAR Pair",
+    "capability": "Cross-modal optical-SAR reasoning",
+    "prompt": "What complementary information does the SAR image add to the optical view?",
+    "expected_evidence": "Cross-modal compatibility, fusion evidence map, joint optical-SAR VQA, execution trace"
+  }
+]

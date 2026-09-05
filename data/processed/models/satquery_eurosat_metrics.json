@@ -1,0 +1,36 @@
+{
+  "model_name": "SatQuery EuroSAT Scene Specialist v1",
+  "model_type": "remote_sensing_scene_classifier",
+  "dataset": "EuroSAT RGB",
+  "classes": [
+    "AnnualCrop",
+    "Forest",
+    "HerbaceousVegetation",
+    "Highway",
+    "Industrial",
+    "Pasture",
+    "PermanentCrop",
+    "Residential",
+    "River",
+    "SeaLake"
+  ],
+  "input_size": 64,
+  "normalization_mean": [
+    0.5,
+    0.5,
+    0.5
+  ],
+  "normalization_std": [
+    0.25,
+    0.25,
+    0.25
+  ],
+  "parameter_count": 964170,
+  "best_validation_accuracy": 0.9407407407407408,
+  "test_accuracy": 0.9448148148148148,
+  "test_loss": 0.45846005108621385,
+  "epochs_completed": 10,
+  "seed": 42,
+  "trained_at_utc": "2026-09-04T08:56:55.438188+00:00",
+  "intended_use": "Optical/RGB remote-sensing scene evidence for SatQuery. Predictions are candidate scene labels, not definitive land-cover maps."
+}

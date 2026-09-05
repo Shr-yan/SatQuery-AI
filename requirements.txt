@@ -14,3 +14,4 @@ pydantic
 groq
 python-dotenv
 geopy
+python-multipart

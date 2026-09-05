@@ -1,0 +1,385 @@
+{
+  "schema_version": "1.0",
+  "benchmark": "VRSBench",
+  "subset_name": "VRSBench_MINI 12-category diagnostic subset",
+  "source_repo": "YuJJJJin/VRSBench.tsv",
+  "source_note": "Records are drawn from a public derivative of the VRSBench test set. One deterministic example is used from each of the 12 VQA categories.",
+  "selection_method": "first encountered example per category in VRSBench_MINI.tsv",
+  "sample_count": 12,
+  "categories": [
+    "object existence",
+    "object quantity",
+    "object position",
+    "object category",
+    "object color",
+    "scene type",
+    "object shape",
+    "image",
+    "object size",
+    "reasoning",
+    "object direction",
+    "rural or urban"
+  ],
+  "model": "qwen/qwen3.6-27b",
+  "satquery_rs_specialist_used": true,
+  "satquery_rs_specialist_model": "SatQuery EuroSAT Scene Specialist v1",
+  "metrics": {
+    "exact_match_percent": 50.0,
+    "token_f1_percent": 50.0
+  },
+  "category_metrics": {
+    "image": {
+      "count": 1,
+      "exact_match_percent": 100,
+      "token_f1_percent": 100
+    },
+    "object category": {
+      "count": 1,
+      "exact_match_percent": 0,
+      "token_f1_percent": 0
+    },
+    "object color": {
+      "count": 1,
+      "exact_match_percent": 0,
+      "token_f1_percent": 0
+    },
+    "object direction": {
+      "count": 1,
+      "exact_match_percent": 0,
+      "token_f1_percent": 0
+    },
+    "object existence": {
+      "count": 1,
+      "exact_match_percent": 100,
+      "token_f1_percent": 100
+    },
+    "object position": {
+      "count": 1,
+      "exact_match_percent": 0,
+      "token_f1_percent": 0
+    },
+    "object quantity": {
+      "count": 1,
+      "exact_match_percent": 0,
+      "token_f1_percent": 0
+    },
+    "object shape": {
+      "count": 1,
+      "exact_match_percent": 100,
+      "token_f1_percent": 100
+    },
+    "object size": {
+      "count": 1,
+      "exact_match_percent": 0,
+      "token_f1_percent": 0
+    },
+    "reasoning": {
+      "count": 1,
+      "exact_match_percent": 100,
+      "token_f1_percent": 100
+    },
+    "rural or urban": {
+      "count": 1,
+      "exact_match_percent": 100,
+      "token_f1_percent": 100
+    },
+    "scene type": {
+      "count": 1,
+      "exact_match_percent": 100,
+      "token_f1_percent": 100
+    }
+  },
+  "evaluation_note": "This is a real public VRSBench subset diagnostic. Exact Match and token F1 are SatQuery local diagnostic metrics, not an official full VRSBench leaderboard score.",
+  "created_at": "2026-09-05T06:44:09.075273+00:00",
+  "records": [
+    {
+      "case_id": "08967_0000_28619",
+      "task": "single_image_vqa",
+      "category": "object existence",
+      "question": "Are there shadows visible for the storage tanks?",
+      "reference_answer": "Yes",
+      "model_answer": "yes",
+      "exact_match": 1,
+      "token_f1": 1,
+      "specialist_predictions": [
+        {
+          "label": "Industrial",
+          "score_percent": 41.82
+        },
+        {
+          "label": "SeaLake",
+          "score_percent": 23.64
+        },
+        {
+          "label": "PermanentCrop",
+          "score_percent": 10.7
+        }
+      ]
+    },
+    {
+      "case_id": "P1471_0040_9097",
+      "task": "single_image_vqa",
+      "category": "object quantity",
+      "question": "How many small vehicles are visible?",
+      "reference_answer": "1",
+      "model_answer": "0",
+      "exact_match": 0,
+      "token_f1": 0,
+      "specialist_predictions": [
+        {
+          "label": "HerbaceousVegetation",
+          "score_percent": 44.38
+        },
+        {
+          "label": "Highway",
+          "score_percent": 41.75
+        },
+        {
+          "label": "Industrial",
+          "score_percent": 10.46
+        }
+      ]
+    },
+    {
+      "case_id": "07757_0000_24824",
+      "task": "single_image_vqa",
+      "category": "object position",
+      "question": "Where is the larger ship positioned?",
+      "reference_answer": "bottom-left",
+      "model_answer": "right",
+      "exact_match": 0,
+      "token_f1": 0,
+      "specialist_predictions": [
+        {
+          "label": "HerbaceousVegetation",
+          "score_percent": 82.64
+        },
+        {
+          "label": "SeaLake",
+          "score_percent": 8.34
+        },
+        {
+          "label": "Industrial",
+          "score_percent": 2.37
+        }
+      ]
+    },
+    {
+      "case_id": "07673_0000_24558",
+      "task": "single_image_vqa",
+      "category": "object category",
+      "question": "What is the object in the center of the image?",
+      "reference_answer": "vehicle",
+      "model_answer": "car",
+      "exact_match": 0,
+      "token_f1": 0,
+      "specialist_predictions": [
+        {
+          "label": "Highway",
+          "score_percent": 98.12
+        },
+        {
+          "label": "Industrial",
+          "score_percent": 1.87
+        },
+        {
+          "label": "River",
+          "score_percent": 0.01
+        }
+      ]
+    },
+    {
+      "case_id": "P0897_0048_3091",
+      "task": "single_image_vqa",
+      "category": "object color",
+      "question": "What color are the rooftops of the majority of the houses?",
+      "reference_answer": "Varied",
+      "model_answer": "gray",
+      "exact_match": 0,
+      "token_f1": 0,
+      "specialist_predictions": [
+        {
+          "label": "HerbaceousVegetation",
+          "score_percent": 32.91
+        },
+        {
+          "label": "Industrial",
+          "score_percent": 32.57
+        },
+        {
+          "label": "Forest",
+          "score_percent": 11.65
+        }
+      ]
+    },
+    {
+      "case_id": "07794_0000_24958",
+      "task": "single_image_vqa",
+      "category": "scene type",
+      "question": "Does the image show residential areas?",
+      "reference_answer": "Yes",
+      "model_answer": "yes",
+      "exact_match": 1,
+      "token_f1": 1,
+      "specialist_predictions": [
+        {
+          "label": "HerbaceousVegetation",
+          "score_percent": 65.72
+        },
+        {
+          "label": "Forest",
+          "score_percent": 17.05
+        },
+        {
+          "label": "PermanentCrop",
+          "score_percent": 4.98
+        }
+      ]
+    },
+    {
+      "case_id": "10013_0000_31877",
+      "task": "single_image_vqa",
+      "category": "object shape",
+      "question": "Does the largest storage tank have a circular footprint?",
+      "reference_answer": "Yes",
+      "model_answer": "yes",
+      "exact_match": 1,
+      "token_f1": 1,
+      "specialist_predictions": [
+        {
+          "label": "Industrial",
+          "score_percent": 90.59
+        },
+        {
+          "label": "Highway",
+          "score_percent": 3.48
+        },
+        {
+          "label": "SeaLake",
+          "score_percent": 1.25
+        }
+      ]
+    },
+    {
+      "case_id": "P5789_1524_17082",
+      "task": "single_image_vqa",
+      "category": "image",
+      "question": "Is the image captured in color or grayscale?",
+      "reference_answer": "Grayscale",
+      "model_answer": "grayscale",
+      "exact_match": 1,
+      "token_f1": 1,
+      "specialist_predictions": [
+        {
+          "label": "HerbaceousVegetation",
+          "score_percent": 89.49
+        },
+        {
+          "label": "SeaLake",
+          "score_percent": 5.4
+        },
+        {
+          "label": "AnnualCrop",
+          "score_percent": 2
+        }
+      ]
+    },
+    {
+      "case_id": "07159_0000_22801",
+      "task": "single_image_vqa",
+      "category": "object size",
+      "question": "Is the expressway service area large or small?",
+      "reference_answer": "Small",
+      "model_answer": "large",
+      "exact_match": 0,
+      "token_f1": 0,
+      "specialist_predictions": [
+        {
+          "label": "Industrial",
+          "score_percent": 68.56
+        },
+        {
+          "label": "PermanentCrop",
+          "score_percent": 16.95
+        },
+        {
+          "label": "Residential",
+          "score_percent": 4.62
+        }
+      ]
+    },
+    {
+      "case_id": "P1143_0092_5031",
+      "task": "single_image_vqa",
+      "category": "reasoning",
+      "question": "Does the top plane cast a shadow?",
+      "reference_answer": "Yes",
+      "model_answer": "yes",
+      "exact_match": 1,
+      "token_f1": 1,
+      "specialist_predictions": [
+        {
+          "label": "Industrial",
+          "score_percent": 57.07
+        },
+        {
+          "label": "SeaLake",
+          "score_percent": 9.58
+        },
+        {
+          "label": "Pasture",
+          "score_percent": 8.72
+        }
+      ]
+    },
+    {
+      "case_id": "11544_0000_36848",
+      "task": "single_image_vqa",
+      "category": "object direction",
+      "question": "Are the tennis courts aligned vertically or horizontally?",
+      "reference_answer": "Horizontally",
+      "model_answer": "vertically",
+      "exact_match": 0,
+      "token_f1": 0,
+      "specialist_predictions": [
+        {
+          "label": "Highway",
+          "score_percent": 99.8
+        },
+        {
+          "label": "Industrial",
+          "score_percent": 0.15
+        },
+        {
+          "label": "River",
+          "score_percent": 0.02
+        }
+      ]
+    },
+    {
+      "case_id": "10819_0000_34479",
+      "task": "single_image_vqa",
+      "category": "rural or urban",
+      "question": "Is the area densely populated?",
+      "reference_answer": "No",
+      "model_answer": "No",
+      "exact_match": 1,
+      "token_f1": 1,
+      "specialist_predictions": [
+        {
+          "label": "PermanentCrop",
+          "score_percent": 84.41
+        },
+        {
+          "label": "River",
+          "score_percent": 7.37
+        },
+        {
+          "label": "HerbaceousVegetation",
+          "score_percent": 2.84
+        }
+      ]
+    }
+  ],
+  "imported_at": "2026-09-05T06:53:24.037356+00:00"
+}

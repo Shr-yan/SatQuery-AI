@@ -40,16 +40,27 @@
 
         </div>
 
-        <button
-            id="themeToggle"
-            class="theme-toggle"
-            type="button"
-            aria-label="Switch to light mode"
-            aria-pressed="false"
-        >
-            <span id="themeIcon" aria-hidden="true">☀️</span>
-            <span id="themeLabel">Light mode</span>
-        </button>
+        <div class="header-actions">
+            <a
+                id="evaluationLink"
+                class="header-link-button"
+                href="/evaluation"
+                title="Open the SatQuery evaluation and benchmark-readiness center"
+            >
+                Evaluation
+            </a>
+
+            <button
+                id="themeToggle"
+                class="theme-toggle"
+                type="button"
+                aria-label="Switch to light mode"
+                aria-pressed="false"
+            >
+                <span id="themeIcon" aria-hidden="true">☀️</span>
+                <span id="themeLabel">Light mode</span>
+            </button>
+        </div>
 
     </div>
 
@@ -58,7 +69,32 @@
 
 <main>
 
-    <section class="query-panel">
+    <section class="workspace-switcher" aria-label="SatQuery workspace mode">
+
+        <button
+            id="searchEarthModeButton"
+            class="workspace-tab active"
+            type="button"
+            aria-pressed="true"
+        >
+            <span class="workspace-tab-title">Search Earth</span>
+            <span class="workspace-tab-copy">Place + date + natural query</span>
+        </button>
+
+        <button
+            id="analyzeImageryModeButton"
+            class="workspace-tab"
+            type="button"
+            aria-pressed="false"
+        >
+            <span class="workspace-tab-title">Analyze My Imagery</span>
+            <span class="workspace-tab-copy">Upload image(s) + natural query</span>
+        </button>
+
+    </section>
+
+
+    <section class="query-panel" id="searchEarthPanel">
 
         <h2>
             Ask SatQuery
@@ -138,6 +174,667 @@
     </section>
 
 
+    <section
+        class="upload-panel hidden"
+        id="analyzeImageryPanel"
+    >
+
+        <div class="upload-panel-header">
+            <div>
+                <h2>Analyze My Imagery</h2>
+                <p>
+                    Analyze a single remote-sensing image, a spatially corresponding
+                    before/after pair, or an optical + SAR pair through natural-language questions.
+                </p>
+            </div>
+
+            <span class="phase-badge">Vision-language workspace</span>
+        </div>
+
+        <div class="imagery-mode-switcher" aria-label="Uploaded imagery workflow">
+            <button
+                id="singleImageModeButton"
+                class="imagery-mode-tab active"
+                type="button"
+                aria-pressed="true"
+            >
+                Single Image
+            </button>
+            <button
+                id="changePairModeButton"
+                class="imagery-mode-tab"
+                type="button"
+                aria-pressed="false"
+            >
+                Before + After Pair
+            </button>
+            <button
+                id="crossModalModeButton"
+                class="imagery-mode-tab"
+                type="button"
+                aria-pressed="false"
+            >
+                Optical + SAR Pair
+            </button>
+        </div>
+
+        <div id="singleImageWorkflow">
+
+        <div
+            class="upload-dropzone"
+            id="uploadDropzone"
+            aria-label="Remote-sensing image drop area"
+        >
+            <div class="upload-icon" aria-hidden="true">↥</div>
+            <h3>Drop a satellite image here</h3>
+            <p>GeoTIFF/TIFF, PNG, JPG or JPEG • maximum 30 MB</p>
+
+            <button
+                id="chooseImageryButton"
+                class="secondary-action-button"
+                type="button"
+            >
+                Choose Image
+            </button>
+
+            <input
+                id="imageryFileInput"
+                type="file"
+                accept=".tif,.tiff,.png,.jpg,.jpeg,image/tiff,image/png,image/jpeg"
+                hidden
+            >
+        </div>
+
+        <div class="selected-file-row">
+            <div>
+                <span class="selected-file-label">Selected file</span>
+                <strong id="selectedImageryName">No file selected</strong>
+                <span id="selectedImagerySize">-</span>
+            </div>
+
+            <button
+                id="uploadImageryButton"
+                class="primary-upload-button"
+                type="button"
+                disabled
+            >
+                Upload & Validate
+            </button>
+        </div>
+
+        <div id="uploadStatus" class="upload-status"></div>
+
+        <div
+            class="uploaded-image-result hidden"
+            id="uploadedImageResult"
+        >
+
+            <div class="upload-success-banner">
+                <strong>Input accepted.</strong>
+                <span id="uploadValidationMessage">Validation complete.</span>
+            </div>
+
+            <div class="uploaded-preview-grid">
+
+                <div class="image-card uploaded-preview-card">
+                    <h3>Uploaded Image Preview</h3>
+                    <img
+                        id="uploadedPreviewImage"
+                        alt="Preview of uploaded remote-sensing imagery"
+                    >
+                    <p class="preview-note" id="uploadedPreviewNote"></p>
+                </div>
+
+                <div class="details-card upload-metadata-card">
+                    <h3>Input Validation</h3>
+
+                    <div class="detail">
+                        <span>Format</span>
+                        <span id="uploadedFormat">-</span>
+                    </div>
+
+                    <div class="detail">
+                        <span>Dimensions</span>
+                        <span id="uploadedDimensions">-</span>
+                    </div>
+
+                    <div class="detail">
+                        <span>Bands</span>
+                        <span id="uploadedBands">-</span>
+                    </div>
+
+                    <div class="detail">
+                        <span>Data type</span>
+                        <span id="uploadedDtype">-</span>
+                    </div>
+
+                    <div class="detail">
+                        <span>CRS</span>
+                        <span id="uploadedCrs">-</span>
+                    </div>
+
+                    <div class="detail">
+                        <span>Resolution</span>
+                        <span id="uploadedResolution">-</span>
+                    </div>
+
+                    <div class="detail">
+                        <span>Georeferenced</span>
+                        <span id="uploadedGeoreferenced">-</span>
+                    </div>
+
+                    <div class="detail">
+                        <span>Modality hint</span>
+                        <span id="uploadedModalityHint">-</span>
+                    </div>
+
+                    <div class="upload-warning hidden" id="uploadWarning"></div>
+                </div>
+
+            </div>
+
+            <div
+                class="details-card specialist-evidence-card hidden"
+                id="specialistEvidenceCard"
+            >
+                <div class="specialist-card-heading">
+                    <div>
+                        <span class="specialist-kicker">REMOTE-SENSING SPECIALIST</span>
+                        <h3>EuroSAT Scene Evidence</h3>
+                    </div>
+                    <span class="specialist-badge">RS-adapted</span>
+                </div>
+
+                <div class="detail">
+                    <span>Model</span>
+                    <span id="specialistModelName">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>Training dataset</span>
+                    <span id="specialistDataset">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>Top scene candidate</span>
+                    <span id="specialistTopCandidate">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>Top model score</span>
+                    <span id="specialistTopScore">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>Other candidates</span>
+                    <span id="specialistOtherCandidates">-</span>
+                </div>
+
+                <div class="detail">
+                    <span>Held-out test accuracy</span>
+                    <span id="specialistTestAccuracy">-</span>
+                </div>
+
+                <p class="specialist-note" id="specialistNote"></p>
+            </div>
+
+            <div class="uploaded-vqa-panel">
+
+                <div class="uploaded-vqa-header">
+                    <div>
+                        <h3>Ask About This Image</h3>
+                        <p>
+                            Ask visual questions or generate a scene description.
+                            Follow-up questions stay connected to this uploaded image.
+                        </p>
+                    </div>
+
+                    <button
+                        id="clearUploadedChatButton"
+                        class="chat-clear-button"
+                        type="button"
+                    >
+                        Clear chat
+                    </button>
+                </div>
+
+                <div class="uploaded-vqa-examples">
+                    <button
+                        class="uploaded-vqa-example"
+                        type="button"
+                        data-upload-question="Describe this remote-sensing scene and its major visible spatial patterns."
+                    >
+                        Describe Scene
+                    </button>
+
+                    <button
+                        class="uploaded-vqa-example"
+                        type="button"
+                        data-upload-question="What major land-cover or surface patterns are visually suggested in this image? Be cautious where uncertain."
+                    >
+                        Land-cover Patterns
+                    </button>
+
+                    <button
+                        class="uploaded-vqa-example"
+                        type="button"
+                        data-upload-question="Is there any water-like area visible in this image? If yes, describe where it appears."
+                    >
+                        Water
+                    </button>
+
+                    <button
+                        class="uploaded-vqa-example"
+                        type="button"
+                        data-upload-question="What are the major visible features in this image and where are they located relative to the image?"
+                    >
+                        Major Features
+                    </button>
+                </div>
+
+                <div
+                    class="chat-messages uploaded-chat-messages"
+                    id="uploadedChatMessages"
+                >
+                    <div class="chat-message assistant-message">
+                        <div class="chat-role">SatQuery Vision</div>
+                        <div>
+                            Image validated. Ask a question about the uploaded scene,
+                            or choose Describe Scene to generate a caption.
+                        </div>
+                    </div>
+                </div>
+
+                <div id="uploadedChatStatus" class="chat-status"></div>
+
+                <div class="chat-input-row">
+                    <input
+                        id="uploadedChatInput"
+                        type="text"
+                        maxlength="1000"
+                        placeholder="Ask: What do you see? Is water visible? Where are the major features?"
+                    >
+
+                    <button
+                        id="uploadedChatSendButton"
+                        type="button"
+                    >
+                        Ask Image
+                    </button>
+                </div>
+
+                <div
+                    class="execution-trace hidden"
+                    id="uploadedExecutionTrace"
+                >
+                    <h4>Execution Summary</h4>
+                    <div class="execution-trace-grid">
+                        <span>Task</span>
+                        <strong id="uploadedExecutionTask">-</strong>
+
+                        <span>Controller</span>
+                        <strong id="uploadedExecutionController">-</strong>
+
+                        <span>Selected components</span>
+                        <strong id="uploadedExecutionTools">-</strong>
+
+                        <span>Key parameters</span>
+                        <strong id="uploadedExecutionParameters">-</strong>
+
+                        <span>Status</span>
+                        <strong id="uploadedExecutionStatus">-</strong>
+                    </div>
+                </div>
+
+                <div class="report-actions">
+                    <button id="downloadUploadedReportButton" class="report-button" type="button" disabled>Download Evidence Report</button>
+                    <button id="downloadUploadedJsonButton" class="report-button secondary" type="button" disabled>JSON Evidence</button>
+                    <span id="uploadedReportStatus" class="report-status"></span>
+                </div>
+
+            </div>
+
+        </div>
+
+        </div>
+
+        <div
+            id="changePairWorkflow"
+            class="hidden"
+        >
+            <div class="pair-intro-card">
+                <h3>Bi-temporal Change Analysis</h3>
+                <p>
+                    Upload two spatially corresponding observations of the same area.
+                    SatQuery checks compatibility, creates a visual change map and
+                    enables change-based visual question answering.
+                </p>
+            </div>
+
+            <div class="pair-file-grid">
+                <div class="pair-file-card">
+                    <span class="pair-file-kicker">BEFORE</span>
+                    <h3>Earlier observation</h3>
+                    <button
+                        id="chooseBeforeButton"
+                        class="secondary-action-button"
+                        type="button"
+                    >Choose Before Image</button>
+                    <input
+                        id="beforeFileInput"
+                        type="file"
+                        accept=".tif,.tiff,.png,.jpg,.jpeg,image/tiff,image/png,image/jpeg"
+                        hidden
+                    >
+                    <strong id="beforeFileName">No file selected</strong>
+                    <span id="beforeFileSize">-</span>
+                </div>
+
+                <div class="pair-file-card">
+                    <span class="pair-file-kicker">AFTER</span>
+                    <h3>Later observation</h3>
+                    <button
+                        id="chooseAfterButton"
+                        class="secondary-action-button"
+                        type="button"
+                    >Choose After Image</button>
+                    <input
+                        id="afterFileInput"
+                        type="file"
+                        accept=".tif,.tiff,.png,.jpg,.jpeg,image/tiff,image/png,image/jpeg"
+                        hidden
+                    >
+                    <strong id="afterFileName">No file selected</strong>
+                    <span id="afterFileSize">-</span>
+                </div>
+            </div>
+
+            <div class="pair-action-row">
+                <button
+                    id="analyzePairButton"
+                    class="primary-upload-button"
+                    type="button"
+                    disabled
+                >Validate Pair & Analyze Change</button>
+            </div>
+
+            <div id="pairStatus" class="upload-status"></div>
+
+            <div id="pairResult" class="hidden">
+                <div class="upload-success-banner">
+                    <strong>Pair accepted.</strong>
+                    <span id="pairValidationMessage">Compatibility checks passed.</span>
+                </div>
+
+                <div class="pair-preview-grid">
+                    <div class="image-card">
+                        <h3>Before</h3>
+                        <img id="beforePreviewImage" alt="Before image preview">
+                    </div>
+                    <div class="image-card">
+                        <h3>After</h3>
+                        <img id="afterPreviewImage" alt="After image preview">
+                    </div>
+                    <div class="image-card">
+                        <h3>Visual Difference Map</h3>
+                        <img id="pairChangeMap" alt="Visual change difference map">
+                        <p class="preview-note">
+                            Heuristic display-level difference map, not a semantic ground-truth mask.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="details-grid pair-details-grid">
+                    <div class="details-card">
+                        <h3>Pair Compatibility</h3>
+                        <div class="detail"><span>Same dimensions</span><span id="pairSameDimensions">-</span></div>
+                        <div class="detail"><span>Both georeferenced</span><span id="pairBothGeoreferenced">-</span></div>
+                        <div class="detail"><span>Verified same grid</span><span id="pairGeospatialCompatible">-</span></div>
+                        <div class="detail"><span>Before CRS</span><span id="pairBeforeCrs">-</span></div>
+                        <div class="detail"><span>After CRS</span><span id="pairAfterCrs">-</span></div>
+                    </div>
+
+                    <div class="details-card">
+                        <h3>Visual Change Heuristic</h3>
+                        <div class="detail"><span>Mean visual difference</span><span id="pairMeanDifference">-</span></div>
+                        <div class="detail"><span>Pixels above threshold</span><span id="pairChangedPixels">-</span></div>
+                        <div class="detail"><span>Threshold</span><span id="pairThreshold">-</span></div>
+                        <div class="detail"><span>Meaning</span><span id="pairHeuristicMeaning">-</span></div>
+                    </div>
+                </div>
+
+                <div class="uploaded-vqa-panel">
+                    <div class="uploaded-vqa-header">
+                        <div>
+                            <h3>Ask About the Change</h3>
+                            <p>
+                                Ask what changed, where visible change occurred, or whether a visible pattern increased/decreased.
+                            </p>
+                        </div>
+                        <button
+                            id="clearPairChatButton"
+                            class="chat-clear-button"
+                            type="button"
+                        >Clear chat</button>
+                    </div>
+
+                    <div class="uploaded-vqa-examples">
+                        <button class="pair-vqa-example" type="button" data-pair-question="What changed between the before and after images, and where is the visible change concentrated?">Describe Change</button>
+                        <button class="pair-vqa-example" type="button" data-pair-question="Which parts of the image appear most stable and which parts changed the most?">Where Changed?</button>
+                        <button class="pair-vqa-example" type="button" data-pair-question="Has any vegetation-like, water-like, or built-up-like visual pattern noticeably increased or decreased? Be cautious where uncertain.">Pattern Change</button>
+                    </div>
+
+                    <div class="chat-messages uploaded-chat-messages" id="pairChatMessages">
+                        <div class="chat-message assistant-message">
+                            <div class="chat-role">SatQuery Change Vision</div>
+                            <div>Pair validated. Ask what changed between the two observations.</div>
+                        </div>
+                    </div>
+
+                    <div id="pairChatStatus" class="chat-status"></div>
+
+                    <div class="chat-input-row">
+                        <input
+                            id="pairChatInput"
+                            type="text"
+                            maxlength="1000"
+                            placeholder="Ask: What changed and where did it occur?"
+                        >
+                        <button id="pairChatSendButton" type="button">Ask Change</button>
+                    </div>
+
+                    <div class="execution-trace hidden" id="pairExecutionTrace">
+                        <h4>Execution Summary</h4>
+                        <div class="execution-trace-grid">
+                            <span>Task</span><strong id="pairExecutionTask">-</strong>
+                            <span>Workflow</span><strong id="pairExecutionTools">-</strong>
+                            <span>Status</span><strong id="pairExecutionStatus">-</strong>
+                        </div>
+                    </div>
+
+                    <div class="report-actions">
+                        <button id="downloadPairReportButton" class="report-button" type="button" disabled>Download Evidence Report</button>
+                        <button id="downloadPairJsonButton" class="report-button secondary" type="button" disabled>JSON Evidence</button>
+                        <span id="pairReportStatus" class="report-status"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div
+            id="crossModalWorkflow"
+            class="hidden"
+        >
+            <div class="pair-intro-card">
+                <h3>Optical + SAR Cross-Modal Analysis</h3>
+                <p>
+                    Upload spatially corresponding optical/multispectral and SAR imagery.
+                    SatQuery validates the pair, combines complementary visual/structural cues,
+                    and enables joint cross-modal question answering.
+                </p>
+            </div>
+
+            <div class="pair-file-grid">
+                <div class="pair-file-card">
+                    <span class="pair-file-kicker">OPTICAL</span>
+                    <h3>Optical / Multispectral image</h3>
+                    <button
+                        id="chooseOpticalButton"
+                        class="secondary-action-button"
+                        type="button"
+                    >Choose Optical Image</button>
+                    <input
+                        id="opticalFileInput"
+                        type="file"
+                        accept=".tif,.tiff,.png,.jpg,.jpeg,image/tiff,image/png,image/jpeg"
+                        hidden
+                    >
+                    <strong id="opticalFileName">No file selected</strong>
+                    <span id="opticalFileSize">-</span>
+                </div>
+
+                <div class="pair-file-card">
+                    <span class="pair-file-kicker">SAR</span>
+                    <h3>SAR image</h3>
+                    <button
+                        id="chooseSarButton"
+                        class="secondary-action-button"
+                        type="button"
+                    >Choose SAR Image</button>
+                    <input
+                        id="sarFileInput"
+                        type="file"
+                        accept=".tif,.tiff,.png,.jpg,.jpeg,image/tiff,image/png,image/jpeg"
+                        hidden
+                    >
+                    <strong id="sarFileName">No file selected</strong>
+                    <span id="sarFileSize">-</span>
+                </div>
+            </div>
+
+            <div class="pair-action-row">
+                <button
+                    id="analyzeCrossModalButton"
+                    class="primary-upload-button"
+                    type="button"
+                    disabled
+                >Validate Pair & Fuse Evidence</button>
+            </div>
+
+            <div id="crossModalStatus" class="upload-status"></div>
+
+            <div id="crossModalResult" class="hidden">
+                <div class="upload-success-banner">
+                    <strong>Cross-modal pair accepted.</strong>
+                    <span id="crossModalValidationMessage">Compatibility checks passed.</span>
+                </div>
+
+                <div class="pair-preview-grid">
+                    <div class="image-card">
+                        <h3>Optical</h3>
+                        <img id="opticalPreviewImage" alt="Optical image preview">
+                    </div>
+                    <div class="image-card">
+                        <h3>SAR</h3>
+                        <img id="sarPreviewImage" alt="SAR image preview">
+                    </div>
+                    <div class="image-card">
+                        <h3>Cross-Modal Evidence</h3>
+                        <img id="crossModalFusionMap" alt="Optical and SAR cross-modal evidence map">
+                        <p class="preview-note">
+                            Relative display-level evidence: blue = water-like candidate cues;
+                            orange/red = built-up-like structural cues. Not a ground-truth classification.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="details-grid pair-details-grid">
+                    <div class="details-card">
+                        <h3>Pair Compatibility</h3>
+                        <div class="detail"><span>Same dimensions</span><span id="crossSameDimensions">-</span></div>
+                        <div class="detail"><span>Both georeferenced</span><span id="crossBothGeoreferenced">-</span></div>
+                        <div class="detail"><span>Verified same grid</span><span id="crossGeospatialCompatible">-</span></div>
+                        <div class="detail"><span>Optical CRS</span><span id="crossOpticalCrs">-</span></div>
+                        <div class="detail"><span>SAR CRS</span><span id="crossSarCrs">-</span></div>
+                    </div>
+
+                    <div class="details-card">
+                        <h3>Cross-Modal Candidate Evidence</h3>
+                        <div class="detail"><span>Water-like candidates</span><span id="crossWaterCandidates">-</span></div>
+                        <div class="detail"><span>Built-up-like candidates</span><span id="crossBuiltCandidates">-</span></div>
+                        <div class="detail"><span>SAR display intensity</span><span id="crossSarIntensity">-</span></div>
+                        <div class="detail"><span>Optical texture</span><span id="crossOpticalTexture">-</span></div>
+                        <div class="detail"><span>SAR texture</span><span id="crossSarTexture">-</span></div>
+                    </div>
+                </div>
+
+                <div class="crossmodal-note">
+                    <strong>Interpretation note:</strong>
+                    <span id="crossModalInterpretation">-</span>
+                </div>
+
+                <div class="uploaded-vqa-panel">
+                    <div class="uploaded-vqa-header">
+                        <div>
+                            <h3>Ask Across Optical + SAR</h3>
+                            <p>
+                                Ask what the SAR adds to the optical view, or where the two modalities
+                                jointly suggest water-like or built-up-like regions.
+                            </p>
+                        </div>
+                        <button
+                            id="clearCrossModalChatButton"
+                            class="chat-clear-button"
+                            type="button"
+                        >Clear chat</button>
+                    </div>
+
+                    <div class="uploaded-vqa-examples">
+                        <button class="crossmodal-vqa-example" type="button" data-crossmodal-question="Use the optical and SAR images together. What complementary information does the SAR image add to the optical view?">Complementary Info</button>
+                        <button class="crossmodal-vqa-example" type="button" data-crossmodal-question="Using both modalities, identify any water-like candidate regions and describe where they appear. Be cautious about uncertainty.">Water Candidates</button>
+                        <button class="crossmodal-vqa-example" type="button" data-crossmodal-question="Using both modalities, identify any built-up-like structural candidate regions and describe where they appear. Be cautious about uncertainty.">Built-up Candidates</button>
+                    </div>
+
+                    <div class="chat-messages uploaded-chat-messages" id="crossModalChatMessages">
+                        <div class="chat-message assistant-message">
+                            <div class="chat-role">SatQuery Cross-Modal Vision</div>
+                            <div>Pair validated. Ask a question that uses the optical and SAR evidence together.</div>
+                        </div>
+                    </div>
+
+                    <div id="crossModalChatStatus" class="chat-status"></div>
+
+                    <div class="chat-input-row">
+                        <input
+                            id="crossModalChatInput"
+                            type="text"
+                            maxlength="1000"
+                            placeholder="Ask: What does SAR reveal that optical does not?"
+                        >
+                        <button id="crossModalChatSendButton" type="button">Ask Pair</button>
+                    </div>
+
+                    <div class="execution-trace hidden" id="crossModalExecutionTrace">
+                        <h4>Execution Summary</h4>
+                        <div class="execution-trace-grid">
+                            <span>Task</span><strong id="crossModalExecutionTask">-</strong>
+                            <span>Workflow</span><strong id="crossModalExecutionTools">-</strong>
+                            <span>Status</span><strong id="crossModalExecutionStatus">-</strong>
+                        </div>
+                    </div>
+
+                    <div class="report-actions">
+                        <button id="downloadCrossModalReportButton" class="report-button" type="button" disabled>Download Evidence Report</button>
+                        <button id="downloadCrossModalJsonButton" class="report-button secondary" type="button" disabled>JSON Evidence</button>
+                        <span id="crossModalReportStatus" class="report-status"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+
     <section id="results">
 
         <div class="summary-card">
@@ -148,6 +845,12 @@
 
             <p id="resultMessage"></p>
 
+        </div>
+
+        <div class="report-actions search-report-actions">
+            <button id="downloadSearchReportButton" class="report-button" type="button" disabled>Download Evidence Report</button>
+            <button id="downloadSearchJsonButton" class="report-button secondary" type="button" disabled>JSON Evidence</button>
+            <span id="searchReportStatus" class="report-status"></span>
         </div>
 
 
